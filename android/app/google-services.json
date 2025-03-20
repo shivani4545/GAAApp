@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "363129951120",
+    "project_id": "gaaapp-d8450",
+    "storage_bucket": "gaaapp-d8450.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:363129951120:android:932e4bfbf06a665d281915",
+        "android_client_info": {
+          "package_name": "com.gaa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDneeOQfckzEVwqfJtwhJR-IRQr84v_x5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

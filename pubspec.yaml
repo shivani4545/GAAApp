@@ -51,6 +51,8 @@ dependencies:
   android_id:
   firebase_core:
   firebase_messaging:
+  flutter_local_notifications:
+  awesome_notifications:
 
 
 dev_dependencies:
