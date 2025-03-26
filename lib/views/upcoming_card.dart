@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'camera_screen.dart';
 import 'field_engineer_form.dart';
 
 class UpcomingCard extends StatelessWidget {
@@ -80,7 +81,7 @@ class UpcomingCard extends StatelessWidget {
                         Get.snackbar("Error", "Appointment ID is missing.");
                       }
                     },
-                    child: const Text("Start Inspection"),
+                    child: const Text("Inspect"),
                   ),
                 ],
               ),

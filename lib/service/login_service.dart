@@ -6,13 +6,16 @@ import '../utils/apis.dart';
 import 'package:http/http.dart' as http;
 class LoginService{
 
-  Future<LoginResponse> login(String email, String password) async {
+  Future<LoginResponse> login(String email, String password,String? deviceID,String? token) async {
     try {
       var url = Uri.parse(Apis.login);
       var body = {
         'email': email,
         'password': password,
+        'device_id': deviceID??"",
+        'fcm_token': token??"",
       };
+      print(body);
       var response = await http.post(url, body: body);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);

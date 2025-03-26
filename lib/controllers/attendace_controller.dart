@@ -41,7 +41,7 @@ class AttendanceController extends GetxController {
   @override
   void onClose() {
     developer.log('AttendanceController: onClose called');
-    _stopLocationTracking(); // Make sure to stop tracking on close
+    //_stopLocationTracking(); // Make sure to stop tracking on close
     super.onClose();
   }
 
@@ -56,7 +56,7 @@ class AttendanceController extends GetxController {
         isStartShiftVisible.value = true;
         isEndShiftVisible.value = false;
         isTracking.value = false;
-        _stopLocationTracking();
+        //_stopLocationTracking();
       } else if (attendanceStatus.value.status == 1) {
         isStartShiftVisible.value = false;
         isEndShiftVisible.value = true;
@@ -72,7 +72,7 @@ class AttendanceController extends GetxController {
         // Calculate the duration correctly
         Duration difference = attendanceStatus.value.shiftEndTime!.difference(attendanceStatus.value.shiftStartTime!);
         totalDuration.value = _formatDuration(difference);
-        _stopLocationTracking();
+        //_stopLocationTracking();
       }
     } catch (e) {
       developer.log('Error in checkShiftStatus: $e');
@@ -119,7 +119,7 @@ class AttendanceController extends GetxController {
       if (isMarked) {
         await sharedPrefService.saveShiftStatus("0");
         isTracking.value = false;
-        _stopLocationTracking();
+        //_stopLocationTracking();
         checkShiftStatus();
       }
     } catch (e) {
@@ -180,7 +180,7 @@ class AttendanceController extends GetxController {
 
       // Start location tracking only if isTracking is true
       if (isTracking.value) {
-        _startLocationTracking();
+        //_startLocationTracking();
       }
     } catch (e) {
       if (e is PlatformException && e.code == 'PERMISSION_DENIED') {
@@ -197,62 +197,62 @@ class AttendanceController extends GetxController {
     }
   }
 
-  void _startLocationTracking() async {
-    developer.log('AttendanceController: _startLocationTracking called');
-
-    if (isTracking.value) {
-      if (_locationSubscription == null) {
-        developer.log('Starting location tracking');
-
-        _locationSubscription = location.onLocationChanged.listen(
-                (loc.LocationData currentLocation) async {
-              developer.log(
-                  'Location changed: ${currentLocation.latitude}, ${currentLocation.longitude}');
-              if (isTracking.value &&
-                  currentLocation.latitude != null &&
-                  currentLocation.longitude != null) {
-                locations.add(LocationList(
-                  latitude: currentLocation.latitude.toString(),
-                  longitude: currentLocation.longitude.toString(),
-                ));
-
-                try {
-                  bool isUpdated = await attendanceService.updateLocation(
-                    currentLocation.latitude.toString(),
-                    currentLocation.longitude.toString(),
-                  );
-
-                  if (!isUpdated) {
-                    developer.log("Failed to update location on server");
-                  }
-                } catch (e) {
-                  developer.log('Error updating location on server: $e');
-                }
-              } else {
-                developer
-                    .log('Location tracking is disabled or location data is null');
-              }
-            }, onError: (error) {
-          developer.log('Error in location stream: $error');
-        });
-      }
-    } else {
-      developer
-          .log('Location tracking is not enabled, not starting the stream.');
-      _stopLocationTracking();
-    }
-  }
-
-  void _stopLocationTracking() {
-    developer.log('AttendanceController: _stopLocationTracking called');
-    if (_locationSubscription != null) {
-      developer.log('Canceling location subscription');
-      _locationSubscription!.cancel();
-      _locationSubscription = null;
-    } else {
-      developer.log('No active location subscription to cancel');
-    }
-  }
+  // void _startLocationTracking() async {
+  //   developer.log('AttendanceController: _startLocationTracking called');
+  //
+  //   if (isTracking.value) {
+  //     if (_locationSubscription == null) {
+  //       developer.log('Starting location tracking');
+  //
+  //       _locationSubscription = location.onLocationChanged.listen(
+  //               (loc.LocationData currentLocation) async {
+  //             developer.log(
+  //                 'Location changed: ${currentLocation.latitude}, ${currentLocation.longitude}');
+  //             if (isTracking.value &&
+  //                 currentLocation.latitude != null &&
+  //                 currentLocation.longitude != null) {
+  //               locations.add(LocationList(
+  //                 latitude: currentLocation.latitude.toString(),
+  //                 longitude: currentLocation.longitude.toString(),
+  //               ));
+  //
+  //               try {
+  //                 bool isUpdated = await attendanceService.updateLocation(
+  //                   currentLocation.latitude.toString(),
+  //                   currentLocation.longitude.toString(),
+  //                 );
+  //
+  //                 if (!isUpdated) {
+  //                   developer.log("Failed to update location on server");
+  //                 }
+  //               } catch (e) {
+  //                 developer.log('Error updating location on server: $e');
+  //               }
+  //             } else {
+  //               developer
+  //                   .log('Location tracking is disabled or location data is null');
+  //             }
+  //           }, onError: (error) {
+  //         developer.log('Error in location stream: $error');
+  //       });
+  //     }
+  //   } else {
+  //     developer
+  //         .log('Location tracking is not enabled, not starting the stream.');
+  //     _stopLocationTracking();
+  //   }
+  // }
+  //
+  // void _stopLocationTracking() {
+  //   developer.log('AttendanceController: _stopLocationTracking called');
+  //   if (_locationSubscription != null) {
+  //     developer.log('Canceling location subscription');
+  //     _locationSubscription!.cancel();
+  //     _locationSubscription = null;
+  //   } else {
+  //     developer.log('No active location subscription to cancel');
+  //   }
+  // }
 
   Future<geo.Position> _determinePosition() async {
     developer.log('AttendanceController: _determinePosition called');

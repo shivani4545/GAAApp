@@ -1,3 +1,9 @@
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:android_id/android_id.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:gaa_adv/models/login_response_model.dart';
 import 'package:gaa_adv/service/login_service.dart';
 import 'package:gaa_adv/service/shared_pref_service.dart';
@@ -28,11 +34,37 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<String?> _getId() async {
+    var deviceInfo = DeviceInfoPlugin();
+    if (Platform.isIOS) { // import 'dart:io'
+      var iosDeviceInfo = await deviceInfo.iosInfo;
+      return iosDeviceInfo.identifierForVendor; // unique ID on iOS
+    } else if(Platform.isAndroid) {
+      var androidDeviceInfo = await deviceInfo.androidInfo;
+      return AndroidId().getId(); // unique ID on Android
+    }
+  }
+
+  Future<String?> getfcmToken()async{
+    String? token;
+    try{
+       token = await FirebaseMessaging.instance.getToken();
+    }catch(e){
+      log(e.toString());
+    }
+    return token;
+
+  }
+
+
   login(String userName, String password) async {
     isLoginLoading.value = true;
     update();
+
+    String? deviceID = await _getId();
+    String? tokenID = await getfcmToken();print("Device $deviceID FCM $tokenID");
     try {
-      loginResponse = await loginService.login(userName, password);
+      loginResponse = await loginService.login(userName, password,deviceID,tokenID);
       if (loginResponse.status == true) {
         sharedPrefService.saveUserData(loginResponse);
         Get.off(() => Dashboard());

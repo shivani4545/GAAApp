@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:gaa_adv/controllers/auth_controller.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,7 @@ class LoginScreen extends StatefulWidget {  // Make it stateful
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {

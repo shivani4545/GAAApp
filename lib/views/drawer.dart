@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gaa_adv/controllers/auth_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'camera.dart';
+import 'camera_screen.dart';
 import 'login_screen.dart';
+// Import the CameraPage here
 
 class MyDrawer extends StatelessWidget {
-  const MyDrawer({super.key});
+  const MyDrawer({Key? key}) : super(key: key);
+
   logOut() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.clear();
-    // ignore: deprecated_member_use
     sharedPreferences.commit();
     Get.offAll(() => const LoginScreen());
   }
@@ -21,31 +22,31 @@ class MyDrawer extends StatelessWidget {
     final size = MediaQuery.sizeOf(context);
     final isTablet = size.width > 600;
     return Drawer(
-      //backgroundColor: Colors.whiteColor,
       child: ListView(
         children: [
           DrawerHeader(
             child: SizedBox(
-                child: Container(
-                  padding: const EdgeInsets.all(5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          Image.asset("assets/images/logo.png",
-                              height:isTablet ? size.height * .05 : size.height * .08),
-                          const SizedBox(width: 20),
-                          Text(
-                            "GAA",
-                            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-                  ),
-                )),
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        Image.asset("assets/images/logo.png",
+                            height: isTablet ? size.height * .05 : size.height * .08),
+                        const SizedBox(width: 20),
+                        Text(
+                          "GAA",
+                          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                ),
+              ),
+            ),
           ),
           ListTile(
             leading: const Icon(
@@ -62,15 +63,16 @@ class MyDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(
-              Icons.speaker_notes_sharp,
+              Icons.camera_alt,
               color: Color(0xFFF9CB47),
             ),
             title: Text(
-              'Menu',
+              'Camera',
               style: GoogleFonts.poppins(),
             ),
             onTap: () {
-              Get.toNamed('dashboard'); // Navigate to the '/dashboard' route.
+              Get.back(); // Close the drawer
+              Get.to(() => ImageUploadScreen()); // Use Get.to() instead of Get.toNamed()
             },
           ),
           ListTile(
@@ -92,7 +94,7 @@ class MyDrawer extends StatelessWidget {
             },
             leading: const Icon(
               Icons.logout,
-             color: Color(0xFFF9CB47),
+              color: Color(0xFFF9CB47),
             ),
             title: Text(
               'Log Out',

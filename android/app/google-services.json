@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "363129951120",
-    "project_id": "gaaapp-d8450",
-    "storage_bucket": "gaaapp-d8450.firebasestorage.app"
+    "project_number": "972154964522",
+    "project_id": "notification-gaa",
+    "storage_bucket": "notification-gaa.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:363129951120:android:932e4bfbf06a665d281915",
+        "mobilesdk_app_id": "1:972154964522:android:5e4fe1df0d41dd810c5153",
         "android_client_info": {
-          "package_name": "com.gaa"
+          "package_name": "com.example.gaa_adv"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDneeOQfckzEVwqfJtwhJR-IRQr84v_x5w"
+          "current_key": "AIzaSyDG2t4r3AvklttqcHrLac8za2hkf1xz6TU"
         }
       ],
       "services": {
