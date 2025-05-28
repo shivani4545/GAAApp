@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../models/ImageUploadListResponse.dart';
+import '../models/image_upload_list_response.dart';
 import '../service/upload_img_service.dart';
 
 

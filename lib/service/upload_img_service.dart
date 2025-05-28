@@ -7,7 +7,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/ImageUploadListResponse.dart';
+import '../models/image_upload_list_response.dart';
 import '../utils/apis.dart'; // Adjust path if needed
 
 

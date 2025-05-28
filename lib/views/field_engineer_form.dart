@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,7 +20,7 @@ class FieldEngineerForm extends StatefulWidget {
   final int appointmentId;
   final MediaType;
 
-  FieldEngineerForm({
+  const FieldEngineerForm({
     super.key,
     this.appointmentData,
     this.initialFormData,
@@ -43,7 +44,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   static const String propertyAddressKey = 'propertyAddress';
   static const String inspectionDateKey = 'inspectionDate';
   static const String hasPhotoWithOwnerKey = 'hasPhotoWithOwner';
-  static const String? photoWithOwnerReasonKey = 'OwnerReason';
+  static const String photoWithOwnerReasonKey = 'OwnerReason';
   static const String zoneKey = 'zone';
   static const String localityTypeKey = 'typeOfLocality';
   static const String colonyTypeKey = 'typeOfColony';
@@ -609,7 +610,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     return await Geolocator.getCurrentPosition();
   }
 
-  // Function to send data to the API
   Future<void> _savePersonalInfo() async {
     final url = Uri.parse(Apis.savePersonalInfo);
    var request = http.MultipartRequest("post", url);
@@ -713,7 +713,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             const SnackBar(
                 content: Text('Session expired. Please login again.')));
 
-        // Add code here to refresh the token and retry the request, or redirect to the login page.
       }
       else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -726,37 +725,39 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               content: Text('Network error occurred. Please try again.')));
     }
   }
+
   Future<void> _savePersonalInfo2() async {
     final url = Uri.parse(Apis.savePersonalInfo);
 
+    log("File Path ${_formData.ownerImagePath}");
     final request = http.MultipartRequest("POST", url);
     request.fields['appointment_id'] = widget.appointmentId.toString();
     request.fields['clientName'] = _formData.clientName ?? "";
     request.fields['propertyAddress'] = _formData.propertyAddress ?? "";
     request.fields['inspectionDate'] = _formData.inspectionDate?.toIso8601String() ?? "";
-    request.fields['hasPhotoWithOwner'] = _formData.hasPhotoWithOwner == 'Yes' ? "true" : "false";
+    request.fields['hasPhotoWithOwner'] = _formData.hasPhotoWithOwner??"";
     request.fields['image_reason'] = _formData.OwnerReason ?? "";
     request.fields['zone'] = _formData.zone ?? "";
     request.fields['typeOfLocality'] = _formData.typeOfLocality ?? "";
     request.fields['typeOfColony'] = _formData.typeOfColony ?? "";
 
-    // Attach the image file if available
     if (_formData.ownerImagePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('imageFile', _formData.ownerImagePath!));
+      request.files.add(await http.MultipartFile.fromPath('owner_image', _formData.ownerImagePath!));
     }
-
-    // Add authorization header
     request.headers['Authorization'] = 'Bearer $_authToken';
 
+    print(request.fields);
     try {
       final response = await request.send();
+      response.stream.transform(utf8.decoder).listen((value) {
+        print(value);
+
+      });
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = await response.stream.bytesToString();
         final responseData = jsonDecode(responseBody);
-
         await _prefs!.setString("appointment_id", responseData['appointment_id'].toString());
-
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Personal information saved successfully!')),
         );
@@ -771,6 +772,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             );
 
             if (redirectResponse.statusCode == 200) {
+
+              print(redirectResponse.body);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Personal information saved after redirect!')),
               );
@@ -806,13 +809,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     }
   }
 
-
   Future<void> _savePropertyInformation() async {
     final url = Uri.parse(Apis.savePropertyInformation);
 
     String keyFormID = _prefs!.getString("appointment_id") ?? "";
-
-    // print("Form ID2(before request): $formID");
 
     final headers = {
       'Content-Type': 'application/json',
@@ -1056,7 +1056,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     }
   }
 
-  // Helper method to log the form data as JSON
   void _logFormData() {
     final jsonData = jsonEncode(_formData.toJson());
   }
@@ -1140,7 +1139,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             if (_formSteps[_currentStepIndex].currentState?.validate() ??
                 false) {
               _formSteps[_currentStepIndex].currentState?.save();
-              _saveAdditionalDetailsInformation(); // Save additional details // save on previous button click
+              _saveAdditionalDetailsInformation();
               _logFormData(); // Log the form data before submitting
 
               widget.onFormSubmit(_formData);

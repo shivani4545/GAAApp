@@ -7,12 +7,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:gaa_adv/models/login_response_model.dart';
 import 'package:gaa_adv/service/login_service.dart';
 import 'package:gaa_adv/service/shared_pref_service.dart';
-import 'package:gaa_adv/views/dashboard.dart' hide Dashboard;
+import 'package:gaa_adv/views/dashboard.dart';
 import 'package:gaa_adv/views/login_screen.dart';
-import 'package:gaa_adv/views/splash_screen.dart';
 import 'package:get/get.dart';
 
-import '../views/upcoming_appointments.dart';
 
 class AuthController extends GetxController {
 

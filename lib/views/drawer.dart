@@ -61,20 +61,6 @@ class MyDrawer extends StatelessWidget {
               Get.back();
             },
           ),
-          // ListTile(
-          //   leading: const Icon(
-          //     Icons.camera_alt,
-          //     color: Color(0xFFF9CB47),
-          //   ),
-          //   title: Text(
-          //     'Camera',
-          //     style: GoogleFonts.poppins(),
-          //   ),
-          //   onTap: () {
-          //     Get.back(); // Close the drawer
-          //     Get.to(() => ImageUploadScreen()); // Use Get.to() instead of Get.toNamed()
-          //   },
-          // ),
           ListTile(
             onTap: () {
               Get.defaultDialog(

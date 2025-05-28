@@ -3,30 +3,42 @@ import 'package:flutter/services.dart';
 import 'package:gaa_adv/controllers/appointment_controller.dart';
 import 'package:gaa_adv/controllers/attendace_controller.dart';
 import 'package:gaa_adv/controllers/auth_controller.dart';
+import 'package:gaa_adv/views/appointments/appointment_card.dart';
 import 'package:gaa_adv/views/upcoming_card.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/upcoming_appointments.dart';
 import 'bottom_nevigation_bar.dart';
 import 'drawer.dart';
+import 'field_engineer_form.dart';
+
 class Dashboard extends StatefulWidget {
-  const Dashboard({Key? key}) : super(key: key);
+  const Dashboard({super.key});
 
   @override
   State<Dashboard> createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
-  int selectedIndex = 0; // Initially select Dashboard
+  int selectedIndex = 0;
 
   void _onItemTapped(int index) {
-    // Navigate based on the selected index.  Modify as needed.
     if (index == 0) {
-      // Stay on Dashboard (already here)
     } else if (index == 1) {
-      Get.offNamed('/menu'); // Navigate to menu. Use offNamed to replace route
+      Get.offNamed('/menu');
     } else if (index == 2) {
-      Get.offNamed('/profile'); // Navigate to profile. Use offNamed to replace route
+      Get.offNamed('/profile');
     }
+  }
+
+  Map<String, dynamic> _prepareAppointmentData(
+      UpcomingAppointments appointment) {
+    return {
+      'clientName': appointment.clientName1 ?? '',
+      'propertyAddress':
+      "${appointment.addressLine1 ?? ''}, ${appointment.addressLine2 ?? ''}",
+      'inspectionDate': appointment.dateOfAvailability?.toIso8601String(),
+    };
   }
 
   @override
@@ -35,7 +47,6 @@ class _DashboardState extends State<Dashboard> {
     final attendanceController = Get.find<AttendanceController>();
     final appointmentController = Get.find<AppointmentController>();
 
-    // Fetch data when the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       appointmentController.getUpcomingAppointments();
       attendanceController.checkShiftStatus();
@@ -172,9 +183,31 @@ class _DashboardState extends State<Dashboard> {
                     itemBuilder: (context, index) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: UpcomingCard(
-                          upcomingAppointment:
-                          appointmentController.upcomingAppointments[index],
+                        child: AppointmentCard(
+                          upcomingAppointments: appointmentController.upcomingAppointments[index],
+                          onStartInspection: (){
+                            if (appointmentController.upcomingAppointments[index].id != null) {
+                              Get.to(() => FieldEngineerForm(
+                                appointmentData: _prepareAppointmentData(appointmentController.upcomingAppointments[index]),
+                                appointmentId: appointmentController.upcomingAppointments[index].id!,
+                                initialFormData: InspectionFormData(
+                                  clientName: appointmentController.upcomingAppointments[index].clientName1,
+                                  propertyAddress:
+                                  "${appointmentController.upcomingAppointments[index].addressLine1 ?? ''}, ${appointmentController.upcomingAppointments[index].addressLine2 ?? ''}",
+                                ),
+                                onFormSubmit: (formData) {
+                                  Get.back();
+                                  Get.snackbar("Success", "Inspection Completed!");
+                                },
+                                onFormDataChange: (formData) {
+                                  print("Form data changed: $formData");
+                                },
+                                MediaType: null,
+                              ));
+                            } else {
+                              Get.snackbar("Error", "Appointment ID is missing.");
+                            }
+                          },
                         ),
                       );
                     },
