@@ -51,11 +51,11 @@ dependencies:
   android_id:
   firebase_core:
   firebase_messaging:
-  flutter_local_notifications:
   awesome_notifications:
   image_picker:
   image:
-path_provider:
+  flutter_image_compress: ^2.4.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

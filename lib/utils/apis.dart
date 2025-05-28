@@ -12,4 +12,5 @@ class Apis {
   static const String saveLocationInformation = "${_baseUrl}save_location_information";
   static const String saveMoreDetails = "${_baseUrl}save_more_details";
   static const String saveAdditionalDetails = "${_baseUrl}save_additional_details";
+  static const String uploadImage = "${_baseUrl}upload_image";
 }

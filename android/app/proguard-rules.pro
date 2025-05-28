@@ -1,0 +1,3 @@
+-dontwarn java.util.**
+-dontwarn java.lang.**
+-dontwarn java.nio.**

@@ -74,7 +74,7 @@ class UpcomingCard extends StatelessWidget {
                           onFormDataChange: (formData) { // Provide the onFormDataChange callback
                             // Handle form data changes (e.g., save to local storage)
                             print("Form data changed: $formData");
-                          },
+                          }, MediaType: null,
                         ));
                       } else {
                         // Handle the case where the appointment ID is missing

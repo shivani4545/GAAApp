@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
@@ -15,26 +17,33 @@ class FieldEngineerForm extends StatefulWidget {
   final Function(InspectionFormData) onFormSubmit;
   final Function(InspectionFormData) onFormDataChange;
   final int appointmentId;
+  final MediaType;
 
-  const FieldEngineerForm({
+  FieldEngineerForm({
     super.key,
     this.appointmentData,
     this.initialFormData,
     required this.onFormSubmit,
     required this.onFormDataChange,
     required this.appointmentId,
+    required this.MediaType,
   });
 
   @override
-  State<FieldEngineerForm> createState() => _FieldEngineerFormState();  // This is correct now!
+  State<FieldEngineerForm> createState() =>
+      _FieldEngineerFormState(); // This is correct now!
 }
 
 class _FieldEngineerFormState extends State<FieldEngineerForm> {
+  final ImagePicker _picker = ImagePicker();
+
+
   // Preference Keys
   static const String clientNameKey = 'clientName';
   static const String propertyAddressKey = 'propertyAddress';
   static const String inspectionDateKey = 'inspectionDate';
   static const String hasPhotoWithOwnerKey = 'hasPhotoWithOwner';
+  static const String? photoWithOwnerReasonKey = 'OwnerReason';
   static const String zoneKey = 'zone';
   static const String localityTypeKey = 'typeOfLocality';
   static const String colonyTypeKey = 'typeOfColony';
@@ -59,7 +68,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   static const String flooringTypeKey = 'flooring';
   static const String woodworkTypeKey = 'woodWork';
   static const String fittingsQualityKey = 'fittings';
-  static const String contactedPersonKey = 'contactedPersonKey';
+  static const String contactedPersonKey = 'personContacted';
   static const String rentalRangeKey = 'rentalRange';
   static const String landMarketRateKey = 'marketRate';
   static const String rentedAreaKey = 'rentedArea';
@@ -101,7 +110,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   static const String keyAccessToken = 'access_token'; // Key to store the auth token
   static const String locationOfPropertyKey = 'locationOfProperty';
   static const String keyFormID = "appointment_id";
-
+  static const String ownerImagePathKey = 'ownerImagePath';
 
 
   // Using a more descriptive name
@@ -141,6 +150,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   final gpsCoordinatesController = TextEditingController();
   final ownerNameController = TextEditingController();
   final propertyAddressController = TextEditingController();
+  late var reasonController = TextEditingController();
   final inspectionDateController = TextEditingController();
   final applicableRateController = TextEditingController();
   final twoPropertyDealersName1Controller = TextEditingController();
@@ -151,6 +161,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   final setBacksRearController = TextEditingController();
   final setBacksSide1Controller = TextEditingController();
   final setBacksSide2Controller = TextEditingController();
+  final OwnerReasonController = TextEditingController();
 
   List<String> _visibleFloors = []; // Renamed for better understanding
   bool _showNumberOfFloors = true;
@@ -176,100 +187,176 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     _formData = widget.initialFormData ?? InspectionFormData();
 
     // Load data from SharedPreferences (only on initial load)
-    _formData.clientName = _prefs!.getString(clientNameKey) ?? _formData.clientName;
-    _formData.propertyAddress = _prefs!.getString(propertyAddressKey) ?? _formData.propertyAddress;
-    _formData.applicableRate = _prefs!.getString(applicableRateKey) ?? _formData.applicableRate;
-    _formData.twoPropertyDealersName1 = _prefs!.getString(dealerName1Key) ?? _formData.twoPropertyDealersName1;
-    _formData.twoPropertyDealersContact1 = _prefs!.getString(dealerContact1Key) ?? _formData.twoPropertyDealersContact2;
-    _formData.twoPropertyDealersName2 = _prefs!.getString(dealerName2Key) ?? _formData.twoPropertyDealersName1;
-    _formData.twoPropertyDealersContact2 = _prefs!.getString(dealerContact2Key) ?? _formData.twoPropertyDealersContact2;
+    _formData.clientName =
+        _prefs!.getString(clientNameKey) ?? _formData.clientName;
+    _formData.propertyAddress =
+        _prefs!.getString(propertyAddressKey) ?? _formData.propertyAddress;
+    _formData.applicableRate =
+        _prefs!.getString(applicableRateKey) ?? _formData.applicableRate;
+    _formData.twoPropertyDealersName1 =
+        _prefs!.getString(dealerName1Key) ?? _formData.twoPropertyDealersName1;
+    _formData.twoPropertyDealersContact1 =
+        _prefs!.getString(dealerContact1Key) ??
+            _formData.twoPropertyDealersContact2;
+    _formData.twoPropertyDealersName2 =
+        _prefs!.getString(dealerName2Key) ?? _formData.twoPropertyDealersName1;
+    _formData.twoPropertyDealersContact2 =
+        _prefs!.getString(dealerContact2Key) ??
+            _formData.twoPropertyDealersContact2;
 
-    _formData.setBacksFront = _prefs!.getString(setbacksFrontKey) ?? _formData.setBacksFront;
-    _formData.setBacksRear = _prefs!.getString(setbacksRearKey) ?? _formData.setBacksRear;
-    _formData.setBacksSide1 = _prefs!.getString(setbacksSide1Key) ?? _formData.setBacksSide1;
-    _formData.setBacksSide2 = _prefs!.getString(setbacksSide2Key) ?? _formData.setBacksSide2;
+    _formData.setBacksFront =
+        _prefs!.getString(setbacksFrontKey) ?? _formData.setBacksFront;
+    _formData.setBacksRear =
+        _prefs!.getString(setbacksRearKey) ?? _formData.setBacksRear;
+    _formData.setBacksSide1 =
+        _prefs!.getString(setbacksSide1Key) ?? _formData.setBacksSide1;
+    _formData.setBacksSide2 =
+        _prefs!.getString(setbacksSide2Key) ?? _formData.setBacksSide2;
 
     String? housesInVicinity = _prefs!.getString(housesVicinityKey);
     _housesInVicinity = housesInVicinity ?? 'Yes';
 
-    _formData.levelOfDevelopment = _prefs!.getString(developmentLevelKey) ?? _formData.levelOfDevelopment;
+    _formData.levelOfDevelopment =
+        _prefs!.getString(developmentLevelKey) ?? _formData.levelOfDevelopment;
 
     String? dateString = _prefs!.getString(inspectionDateKey);
     if (dateString != null) {
-      _formData.inspectionDate = DateTime.tryParse(dateString) ?? _formData.inspectionDate;
+      _formData.inspectionDate =
+          DateTime.tryParse(dateString) ?? _formData.inspectionDate;
     }
 
     // Populate form data from appointment data if available
     if (widget.appointmentData != null) {
       _formData = InspectionFormData(
-        clientName: widget.appointmentData!['clientName'] ?? _formData.clientName ?? '',
-        propertyAddress: widget.appointmentData!['propertyAddress'] ?? _formData.propertyAddress ?? '',
+        clientName: widget.appointmentData!['clientName'] ??
+            _formData.clientName ?? '',
+        propertyAddress: widget.appointmentData!['propertyAddress'] ??
+            _formData.propertyAddress ?? '',
         inspectionDate: widget.appointmentData!['inspectionDate'] != null
-            ? DateTime.tryParse(widget.appointmentData!['inspectionDate']) ?? _formData.inspectionDate
+            ? DateTime.tryParse(widget.appointmentData!['inspectionDate']) ??
+            _formData.inspectionDate
             : _formData.inspectionDate,
-        hasPhotoWithOwner: widget.appointmentData!['hasPhotoWithOwner'] ?? _formData.hasPhotoWithOwner,
+        hasPhotoWithOwner: widget.appointmentData!['hasPhotoWithOwner'] ??
+            _formData.hasPhotoWithOwner,
+        OwnerReason:widget.appointmentData!['OwnerReason']??_formData.OwnerReason,
+
         zone: widget.appointmentData!['zone'] ?? _formData.zone,
-        typeOfLocality: widget.appointmentData!['typeOfLocality'] ?? _formData.typeOfLocality,
-        typeOfColony: widget.appointmentData!['typeOfColony'] ?? _formData.typeOfColony,
-        typeOfOwnership: widget.appointmentData!['typeOfOwnership'] ?? _formData.typeOfOwnership,
-        typeOfProperty: widget.appointmentData!['typeOfProperty'] ?? _formData.typeOfProperty,
-        neighborhoodClassification: widget.appointmentData!['neighborhoodClassification'] ?? _formData.neighborhoodClassification,
-        occupationStatus: widget.appointmentData!['occupationStatus'] ?? _formData.occupationStatus,
-        propertyUsage: widget.appointmentData!['propertyUsage'] ?? _formData.propertyUsage,
-        locationOfProperty: widget.appointmentData!['locationOfProperty'] ?? _formData.locationOfProperty,
-        howItsCoveredNorth: widget.appointmentData!['howItsCoveredNorth'] ?? _formData.howItsCoveredNorth,
-        howItsCoveredSouth: widget.appointmentData!['howItsCoveredSouth'] ?? _formData.howItsCoveredSouth,
-        howItsCoveredEast: widget.appointmentData!['howItsCoveredEast'] ?? _formData.howItsCoveredEast,
-        howItsCoveredWest: widget.appointmentData!['howItsCoveredWest'] ?? _formData.howItsCoveredWest,
-        underSanctionPlan: widget.appointmentData!['underSanctionPlan'] ?? _formData.underSanctionPlan,
-        accToSanctionPlan: widget.appointmentData!['accToSanctionPlan'] ?? _formData.accToSanctionPlan,
-        areaOfPlot: widget.appointmentData!['areaOfPlot'] ?? _formData.areaOfPlot,
-        numberOfFloors: widget.appointmentData!['numberOfFloors'] ?? _formData.numberOfFloors,
-        floorOfFlat: widget.appointmentData!['floorOfFlat'] ?? _formData.floorOfFlat,
-        yearOfConstruction: widget.appointmentData!['yearOfConstruction'] ?? _formData.yearOfConstruction,
+        typeOfLocality: widget.appointmentData!['typeOfLocality'] ??
+            _formData.typeOfLocality,
+        typeOfColony: widget.appointmentData!['typeOfColony'] ??
+            _formData.typeOfColony,
+        typeOfOwnership: widget.appointmentData!['typeOfOwnership'] ??
+            _formData.typeOfOwnership,
+        typeOfProperty: widget.appointmentData!['typeOfProperty'] ??
+            _formData.typeOfProperty,
+        neighborhoodClassification: widget
+            .appointmentData!['neighborhoodClassification'] ??
+            _formData.neighborhoodClassification,
+        occupationStatus: widget.appointmentData!['occupationStatus'] ??
+            _formData.occupationStatus,
+        propertyUsage: widget.appointmentData!['propertyUsage'] ??
+            _formData.propertyUsage,
+        locationOfProperty: widget.appointmentData!['locationOfProperty'] ??
+            _formData.locationOfProperty,
+        howItsCoveredNorth: widget.appointmentData!['howItsCoveredNorth'] ??
+            _formData.howItsCoveredNorth,
+        howItsCoveredSouth: widget.appointmentData!['howItsCoveredSouth'] ??
+            _formData.howItsCoveredSouth,
+        howItsCoveredEast: widget.appointmentData!['howItsCoveredEast'] ??
+            _formData.howItsCoveredEast,
+        howItsCoveredWest: widget.appointmentData!['howItsCoveredWest'] ??
+            _formData.howItsCoveredWest,
+        underSanctionPlan: widget.appointmentData!['underSanctionPlan'] ??
+            _formData.underSanctionPlan,
+        accToSanctionPlan: widget.appointmentData!['accToSanctionPlan'] ??
+            _formData.accToSanctionPlan,
+        areaOfPlot: widget.appointmentData!['areaOfPlot'] ??
+            _formData.areaOfPlot,
+        numberOfFloors: widget.appointmentData!['numberOfFloors'] ??
+            _formData.numberOfFloors,
+        floorOfFlat: widget.appointmentData!['floorOfFlat'] ??
+            _formData.floorOfFlat,
+        yearOfConstruction: widget.appointmentData!['yearOfConstruction'] ??
+            _formData.yearOfConstruction,
         external: widget.appointmentData!['external'] ?? _formData.external,
         internal: widget.appointmentData!['internal'] ?? _formData.internal,
         flooring: widget.appointmentData!['flooring'] ?? _formData.flooring,
         woodWork: widget.appointmentData!['woodWork'] ?? _formData.woodWork,
         fittings: widget.appointmentData!['fittings'] ?? _formData.fittings,
-        contactedPersonKey: widget.appointmentData!['personContacted'] ?? _formData.contactedPersonKey,
-        rentalRange: widget.appointmentData!['rentalRange'] ?? _formData.rentalRange,
-        marketRate: widget.appointmentData!['marketRate'] ?? _formData.marketRate,
-        rentedArea: widget.appointmentData!['rentedArea'] ?? _formData.rentedArea,
-        commercialArea: widget.appointmentData!['commercialArea'] ?? _formData.commercialArea,
-        overHeadTank: widget.appointmentData!['overHeadTank'] ?? _formData.overHeadTank,
+        personContacted: widget.appointmentData!['personContacted'] ??
+            _formData.personContacted,
+        rentalRange: widget.appointmentData!['rentalRange'] ??
+            _formData.rentalRange,
+        marketRate: widget.appointmentData!['marketRate'] ??
+            _formData.marketRate,
+        rentedArea: widget.appointmentData!['rentedArea'] ??
+            _formData.rentedArea,
+        commercialArea: widget.appointmentData!['commercialArea'] ??
+            _formData.commercialArea,
+        overHeadTank: widget.appointmentData!['overHeadTank'] ??
+            _formData.overHeadTank,
         pump: widget.appointmentData!['pump'] ?? _formData.pump,
-        gpsCoordinates: widget.appointmentData!['gpsCoordinates'] ?? _formData.gpsCoordinates,
+        gpsCoordinates: widget.appointmentData!['gpsCoordinates'] ??
+            _formData.gpsCoordinates,
         landmark: widget.appointmentData!['landmark'] ?? _formData.landmark,
-        basementAccomodation: widget.appointmentData!['basementAccomodation'] ?? _formData.basementAccomodation,
-        basementActual: widget.appointmentData!['basementActual'] ?? _formData.basementActual,
-        basementPermissible: widget.appointmentData!['basementPermissible'] ?? _formData.basementPermissible,
-        mezzAccomodation: widget.appointmentData!['mezzAccomodation'] ?? _formData.mezzAccomodation,
-        mezzActual: widget.appointmentData!['mezzActual'] ?? _formData.mezzActual,
-        mezzPermissible: widget.appointmentData!['mezzPermissible'] ?? _formData.mezzPermissible,
-        gfAccomodation: widget.appointmentData!['gfAccomodation'] ?? _formData.gfAccomodation,
+        basementAccomodation: widget.appointmentData!['basementAccomodation'] ??
+            _formData.basementAccomodation,
+        basementActual: widget.appointmentData!['basementActual'] ??
+            _formData.basementActual,
+        basementPermissible: widget.appointmentData!['basementPermissible'] ??
+            _formData.basementPermissible,
+        mezzAccomodation: widget.appointmentData!['mezzAccomodation'] ??
+            _formData.mezzAccomodation,
+        mezzActual: widget.appointmentData!['mezzActual'] ??
+            _formData.mezzActual,
+        mezzPermissible: widget.appointmentData!['mezzPermissible'] ??
+            _formData.mezzPermissible,
+        gfAccomodation: widget.appointmentData!['gfAccomodation'] ??
+            _formData.gfAccomodation,
         gfActual: widget.appointmentData!['gfActual'] ?? _formData.gfActual,
-        gfPermissible: widget.appointmentData!['gfPermissible'] ?? _formData.gfPermissible,
-        ffAccomodation: widget.appointmentData!['ffAccomodation'] ?? _formData.ffAccomodation,
+        gfPermissible: widget.appointmentData!['gfPermissible'] ??
+            _formData.gfPermissible,
+        ffAccomodation: widget.appointmentData!['ffAccomodation'] ??
+            _formData.ffAccomodation,
         ffActual: widget.appointmentData!['ffActual'] ?? _formData.ffActual,
-        ffPermissible: widget.appointmentData!['ffPermissible'] ?? _formData.ffPermissible,
-        sfAccomodation: widget.appointmentData!['sfAccomodation'] ?? _formData.sfAccomodation,
+        ffPermissible: widget.appointmentData!['ffPermissible'] ??
+            _formData.ffPermissible,
+        sfAccomodation: widget.appointmentData!['sfAccomodation'] ??
+            _formData.sfAccomodation,
         sfActual: widget.appointmentData!['sfActual'] ?? _formData.sfActual,
-        sfPermissible: widget.appointmentData!['sfPermissible'] ?? _formData.sfPermissible,
-        tfAccomodation: widget.appointmentData!['tfAccomodation'] ?? _formData.tfAccomodation,
+        sfPermissible: widget.appointmentData!['sfPermissible'] ??
+            _formData.sfPermissible,
+        tfAccomodation: widget.appointmentData!['tfAccomodation'] ??
+            _formData.tfAccomodation,
         tfActual: widget.appointmentData!['tfActual'] ?? _formData.tfActual,
-        tfPermissible: widget.appointmentData!['tfPermissible'] ?? _formData.tfPermissible,
-        applicableRate: widget.appointmentData!['applicableRate'] ?? _formData.applicableRate,
-        twoPropertyDealersName1: widget.appointmentData!['twoPropertyDealersName1'] ?? _formData.twoPropertyDealersName1,
-        twoPropertyDealersContact1: widget.appointmentData!['twoPropertyDealersContact1'] ?? _formData.twoPropertyDealersContact1,
-        twoPropertyDealersName2: widget.appointmentData!['twoPropertyDealersName2'] ?? _formData.twoPropertyDealersName2,
-        twoPropertyDealersContact2: widget.appointmentData!['twoPropertyDealersContact2'] ?? _formData.twoPropertyDealersContact2,
-        setBacksFront: widget.appointmentData!['setBacksFront'] ?? _formData.setBacksFront,
-        setBacksRear: widget.appointmentData!['setBacksRear'] ?? _formData.setBacksRear,
-        setBacksSide1: widget.appointmentData!['setBacksSide1'] ?? _formData.setBacksSide1,
-        setBacksSide2: widget.appointmentData!['setBacksSide2'] ?? _formData.setBacksSide2,
-        levelOfDevelopment: widget.appointmentData!['levelOfDevelopment'] ?? _formData.levelOfDevelopment,
-        housesInVicinity: widget.appointmentData!['housesInVicinity'] ?? _formData.housesInVicinity,
+        tfPermissible: widget.appointmentData!['tfPermissible'] ??
+            _formData.tfPermissible,
+        applicableRate: widget.appointmentData!['applicableRate'] ??
+            _formData.applicableRate,
+        twoPropertyDealersName1: widget
+            .appointmentData!['twoPropertyDealersName1'] ??
+            _formData.twoPropertyDealersName1,
+        twoPropertyDealersContact1: widget
+            .appointmentData!['twoPropertyDealersContact1'] ??
+            _formData.twoPropertyDealersContact1,
+        twoPropertyDealersName2: widget
+            .appointmentData!['twoPropertyDealersName2'] ??
+            _formData.twoPropertyDealersName2,
+        twoPropertyDealersContact2: widget
+            .appointmentData!['twoPropertyDealersContact2'] ??
+            _formData.twoPropertyDealersContact2,
+        setBacksFront: widget.appointmentData!['setBacksFront'] ??
+            _formData.setBacksFront,
+        setBacksRear: widget.appointmentData!['setBacksRear'] ??
+            _formData.setBacksRear,
+        setBacksSide1: widget.appointmentData!['setBacksSide1'] ??
+            _formData.setBacksSide1,
+        setBacksSide2: widget.appointmentData!['setBacksSide2'] ??
+            _formData.setBacksSide2,
+        levelOfDevelopment: widget.appointmentData!['levelOfDevelopment'] ??
+            _formData.levelOfDevelopment,
+        housesInVicinity: widget.appointmentData!['housesInVicinity'] ??
+            _formData.housesInVicinity,
       );
     }
 
@@ -279,7 +366,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     // Load the auth token from Shared Preferences
     _authToken = _prefs!.getString(keyAccessToken);
 
-    print("While Initial $_authToken");
 
     _saveInitialData();
     // Populate controllers with form data
@@ -304,12 +390,20 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     gpsCoordinatesController.text = _formData.gpsCoordinates ?? '';
     ownerNameController.text = _formData.clientName ?? '';
     propertyAddressController.text = _formData.propertyAddress ?? '';
-    inspectionDateController.text = _formData.inspectionDate != null ? DateFormat('dd/MM/yyyy').format(_formData.inspectionDate!) : '';
+    inspectionDateController.text =
+    _formData.inspectionDate != null ? DateFormat('dd/MM/yyyy').format(
+        _formData.inspectionDate!) : '';
+    reasonController =
+        OwnerReasonController;
     applicableRateController.text = _formData.applicableRate ?? '';
-    twoPropertyDealersName1Controller.text = _formData.twoPropertyDealersName1 ?? '';
-    twoPropertyDealersContact1Controller.text = _formData.twoPropertyDealersContact1 ?? '';
-    twoPropertyDealersName2Controller.text = _formData.twoPropertyDealersName2 ?? '';
-    twoPropertyDealersContact2Controller.text = _formData.twoPropertyDealersContact2 ?? '';
+    twoPropertyDealersName1Controller.text =
+        _formData.twoPropertyDealersName1 ?? '';
+    twoPropertyDealersContact1Controller.text =
+        _formData.twoPropertyDealersContact1 ?? '';
+    twoPropertyDealersName2Controller.text =
+        _formData.twoPropertyDealersName2 ?? '';
+    twoPropertyDealersContact2Controller.text =
+        _formData.twoPropertyDealersContact2 ?? '';
     setBacksFrontController.text = _formData.setBacksFront ?? '';
     setBacksRearController.text = _formData.setBacksRear ?? '';
     setBacksSide1Controller.text = _formData.setBacksSide1 ?? '';
@@ -319,47 +413,75 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
 
   Future<void> _saveInitialData() async {
     await _prefs?.setString(clientNameKey, _formData.clientName ?? '');
-    await _prefs?.setString(propertyAddressKey, _formData.propertyAddress ?? '');
+    await _prefs?.setString(
+        propertyAddressKey, _formData.propertyAddress ?? '');
     await _prefs?.setString(
         inspectionDateKey, _formData.inspectionDate?.toIso8601String() ?? '');
     await _prefs?.setString(applicableRateKey, _formData.applicableRate ?? '');
-    await _prefs?.setString(dealerName1Key, _formData.twoPropertyDealersName1 ?? '');
-    await _prefs?.setString(dealerContact1Key, _formData.twoPropertyDealersContact1 ?? '');
-    await _prefs?.setString(dealerName2Key, _formData.twoPropertyDealersName2 ?? '');
-    await _prefs?.setString(dealerContact2Key, _formData.twoPropertyDealersContact2 ?? '');
+    await _prefs?.setString(
+        dealerName1Key, _formData.twoPropertyDealersName1 ?? '');
+    await _prefs?.setString(
+        dealerContact1Key, _formData.twoPropertyDealersContact1 ?? '');
+    await _prefs?.setString(
+        dealerName2Key, _formData.twoPropertyDealersName2 ?? '');
+    await _prefs?.setString(
+        dealerContact2Key, _formData.twoPropertyDealersContact2 ?? '');
     await _prefs?.setString(setbacksFrontKey, _formData.setBacksFront ?? '');
     await _prefs?.setString(setbacksRearKey, _formData.setBacksRear ?? '');
     await _prefs?.setString(setbacksSide1Key, _formData.setBacksSide1 ?? '');
     await _prefs?.setString(setbacksSide2Key, _formData.setBacksSide2 ?? '');
-    await _prefs?.setString(developmentLevelKey, _formData.levelOfDevelopment ?? '');
+    await _prefs?.setString(
+        developmentLevelKey, _formData.levelOfDevelopment ?? '');
     await _prefs?.setString(housesVicinityKey, _housesInVicinity);
-    await _prefs?.setString(ownershipTypeKey, _formData.typeOfOwnership ?? ''); // Save ownership type
-    await _prefs?.setString(propertyTypeKey, _formData.typeOfProperty ?? ''); // Save property type
-    await _prefs?.setString(neighborhoodClassKey, _formData.neighborhoodClassification ?? ''); //Save neighborhood
-    await _prefs?.setString(occupationStatusKey, _formData.occupationStatus ?? ''); //Save occupation status
-    await _prefs?.setString(propertyUsageKey, _formData.propertyUsage ?? ''); // save property usage
-    await _prefs?.setString(locationOfPropertyKey, _formData.locationOfProperty ?? ''); // property location
+    await _prefs?.setString(ownershipTypeKey,
+        _formData.typeOfOwnership ?? ''); // Save ownership type
+    await _prefs?.setString(
+        propertyTypeKey, _formData.typeOfProperty ?? ''); // Save property type
+    await _prefs?.setString(neighborhoodClassKey,
+        _formData.neighborhoodClassification ?? ''); //Save neighborhood
+    await _prefs?.setString(occupationStatusKey,
+        _formData.occupationStatus ?? ''); //Save occupation status
+    await _prefs?.setString(
+        propertyUsageKey, _formData.propertyUsage ?? ''); // save property usage
+    await _prefs?.setString(locationOfPropertyKey,
+        _formData.locationOfProperty ?? ''); // property location
     await _prefs?.setString(externalFinishKey, _formData.external ?? '');
     await _prefs?.setString(internalConditionKey, _formData.internal ?? '');
     await _prefs?.setString(flooringTypeKey, _formData.flooring ?? '');
     await _prefs?.setString(woodworkTypeKey, _formData.woodWork ?? '');
     await _prefs?.setString(fittingsQualityKey, _formData.rentalRange ?? '');
-    await _prefs?.setString(contactedPersonKey, _formData.contactedPersonKey ?? '');
-     await _prefs?.setString(rentalRangeKey, _formData.contactedPersonKey ?? '');
-     await _prefs?.setString(landMarketRateKey, _formData.marketRate ?? '');
-     await _prefs?.setString(rentedAreaKey, _formData.rentedArea ?? '');
-     await _prefs?.setString(commercialAreaKey, _formData.commercialArea ?? '');
-     await _prefs?.setString(overheadTankDetailsKey, _formData.overHeadTank ?? '');
-     await _prefs?.setString(overHeadTank, _formData.pump ?? '');
-     await _prefs?.setString(gpsCoordinatesKey, _formData.gpsCoordinates ?? '');
-     await _prefs?.setString(landmarkKey, _formData.landmark ?? '');
+    await _prefs?.setString(
+        contactedPersonKey, _formData.personContacted ?? '');
+    await _prefs?.setString(rentalRangeKey, _formData.rentalRange ?? '');
+    await _prefs?.setString(landMarketRateKey, _formData.marketRate ?? '');
+    await _prefs?.setString(rentedAreaKey, _formData.rentedArea ?? '');
+    await _prefs?.setString(commercialAreaKey, _formData.commercialArea ?? '');
+    await _prefs?.setString(
+        overheadTankDetailsKey, _formData.overHeadTank ?? '');
+    await _prefs?.setString(overHeadTank, _formData.pump ?? '');
+    await _prefs?.setString(gpsCoordinatesKey, _formData.gpsCoordinates ?? '');
+    await _prefs?.setString(landmarkKey, _formData.landmark ?? '');
     await _prefs?.setString(keyFormID, _formData.appointment_id ?? '');
-// await _prefs?.setString(contactedPersonKey, _formData.contactedPersonKey ?? '');
-    // await _prefs?.setString(contactedPersonKey, _formData.contactedPersonKey ?? '');
-    // await _prefs?.setString(contactedPersonKey, _formData.contactedPersonKey ?? '');
+    await _prefs?.setString(basementAccommKey,_formData.basementAccomodation ??'');
+    await _prefs?.setString(basementActualKey, _formData.basementActual ?? '');
+    await _prefs?.setString(basementPermissibleKey,_formData.basementPermissible ?? '');
+    await _prefs?.setString(mezzAccommKey, _formData.mezzAccomodation ?? '');
+    await _prefs?.setString(mezzActualKey, _formData.mezzActual ?? '');
+    await _prefs?.setString(mezzPermissibleKey, _formData.mezzPermissible ?? '');
+    await _prefs?.setString(gfAccommKey, _formData.gfAccomodation ?? '');
+    await _prefs?.setString(gfPermissibleKey, _formData.gfPermissible ?? '');
+    await _prefs?.setString(gfActualKey, _formData.gfActual ?? '');
+    await _prefs?.setString(ffAccommKey, _formData.ffAccomodation ?? '');
+    await _prefs?.setString(ffActualKey, _formData.ffActual ?? '');
+    await _prefs?.setString(ffPermissibleKey, _formData.ffPermissible ?? '');
+    await _prefs?.setString(sfAccommKey, _formData.sfAccomodation ?? '');
+    await _prefs?.setString(sfActualKey, _formData.sfActual ?? '');
+
+
 
     await _prefs?.setString(structureTypeKey, _formData.typeOfStructure ?? '');
   }
+
   // Renamed function for clarity
   void _updateVisibleFloors(String? propertyType) {
     setState(() {
@@ -451,7 +573,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     setBacksRearController.dispose();
     setBacksSide1Controller.dispose();
     setBacksSide2Controller.dispose();
-
+    OwnerReasonController.dispose();
     super.dispose();
   }
 
@@ -462,7 +584,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Location services are disabled. Please enable them!')));
+          content: Text(
+              'Location services are disabled. Please enable them!')));
       return null;
     }
 
@@ -489,25 +612,37 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   // Function to send data to the API
   Future<void> _savePersonalInfo() async {
     final url = Uri.parse(Apis.savePersonalInfo);
-
-    print("Auth Token (before request1): $_authToken");
+   var request = http.MultipartRequest("post", url);
+   request.fields['appointment_id']=widget.appointmentId.toString();
+   request.fields['clientName']=_formData.clientName??"";
+   request.fields['propertyAddress']=_formData.propertyAddress??"";
+   request.fields['inspectionDate']=_formData.inspectionDate!.toIso8601String();
+   request.fields['hasPhotoWithOwner']=_formData.hasPhotoWithOwner == 'Yes' ? "true" : "false";
+   request.fields['image_reason']=_formData.OwnerReason??"";
+   request.fields['zone']=_formData.zone??"";
+   request.fields['typeOfLocality']=_formData.typeOfLocality??"";
+   request.fields['typeOfColony']=_formData.typeOfColony??"";
+   request.files.add(await http.MultipartFile.fromPath('imageFile',_formData.ownerImagePath!));
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $_authToken', // Make sure this is the correct format
+      'Authorization': 'Bearer $_authToken',
+      // Make sure this is the correct format
     };
     final body = jsonEncode({
+      'appointment_id': widget.appointmentId, // Add appointment ID
       'clientName': _formData.clientName,
       'propertyAddress': _formData.propertyAddress,
       'inspectionDate': _formData.inspectionDate?.toIso8601String(),
-      'hasPhotoWithOwner': _formData.hasPhotoWithOwner == 'Yes' ? true : false,
+      'hasPhotoWithOwner': _formData.hasPhotoWithOwner == 'Yes' ? "true" : "false",
+     // 'image_reason':_formData.image_reason,
+      'owner_image':_formData.OwnerReason,
       'zone': _formData.zone,
       'typeOfLocality': _formData.typeOfLocality,
       'typeOfColony': _formData.typeOfColony,
+
     });
 
-    //  print("API URL: $url");
-    // print("API Body: $body");
 
     try {
       final response = await http.post(
@@ -517,93 +652,167 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         //allow_redirects: true,  // Try with automatic redirects first
       );
 
-      print("API Response Status Code1: ${response.statusCode}");
-      print("API Response Body: ${response.body}");
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
 
-        JsonEncoder encoder = const JsonEncoder.withIndent('  '); // Add indent for readability
+        JsonEncoder encoder = const JsonEncoder.withIndent(
+            '  '); // Add indent for readability
         String prettyJson = encoder.convert(responseData);
-        print("Decoded JSON Response: \n$prettyJson");
 
-        await _prefs!.setString("appointment_id", responseData['appointment_id'].toString());
-        print('Personal Information saved successfully');
+        await _prefs!.setString(
+            "appointment_id", responseData['appointment_id'].toString());
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Personal information saved successfully!')));
+            const SnackBar(
+                content: Text('Personal information saved successfully!')));
       } else if (response.statusCode == 302) {
         // --- Manual Redirect Handling ---
         final redirectUrl = response.headers['location'];
 
         if (redirectUrl != null) {
-          print('Redirecting to: $redirectUrl');
 
           try {
-            // Follow the redirect with a GET request and the same headers
             final redirectResponse = await http.get(
               Uri.parse(redirectUrl),
               headers: headers, // Pass the headers including Authorization
             );
 
-            print("Redirect Response Status Code2: ${redirectResponse.statusCode}");
-            print("Redirect Response Body: ${redirectResponse.body}");
 
             if (redirectResponse.statusCode == 200) {
-
               final redirectResponseData = jsonDecode(redirectResponse.body);
               // **NEW: Print decoded JSON with indentation for better readability**
-              JsonEncoder encoder = const JsonEncoder.withIndent('  '); // Add indent for readability
+              JsonEncoder encoder = const JsonEncoder.withIndent(
+                  '  '); // Add indent for readability
               String prettyJson = encoder.convert(redirectResponseData);
-              print("Decoded JSON Redirect Response: \n$prettyJson");
 
               // Success after redirecting!
               ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Personal information saved successfully ')));
+                  const SnackBar(content: Text(
+                      'Personal information saved successfully ')));
             } else {
               // Handle the error after redirecting
-              print('Failed to save data after redirect. Error: ${redirectResponse.statusCode}');
               ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Failed to save data after redirect. Error: ${redirectResponse.statusCode}')));
+                  SnackBar(content: Text(
+                      'Failed to save data after redirect. Error: ${redirectResponse
+                          .statusCode}')));
             }
           } catch (redirectError) {
-            print('Error during redirect: $redirectError');
             ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error during redirect: $redirectError')));
+                SnackBar(
+                    content: Text('Error during redirect: $redirectError')));
           }
-
         } else {
-          print('Redirection URL missing in the Location header!');
           ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Redirection URL missing in the Location header!')));
+              const SnackBar(content: Text(
+                  'Redirection URL missing in the Location header!')));
         }
       }
       else if (response.statusCode == 401) {
         // Token might be expired
-        print('Unauthorized: Token might be expired. Implement token refresh logic.');
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Session expired. Please login again.')));
+            const SnackBar(
+                content: Text('Session expired. Please login again.')));
 
         // Add code here to refresh the token and retry the request, or redirect to the login page.
       }
       else {
-        print('Failed to save personal information. Status code: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save data. Error: ${response.statusCode}')));
+            SnackBar(content: Text(
+                'Failed to save data. Error: ${response.statusCode}')));
       }
     } catch (e) {
-      print('Error saving personal information: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Network error occurred. Please try again.')));
+          const SnackBar(
+              content: Text('Network error occurred. Please try again.')));
     }
   }
+  Future<void> _savePersonalInfo2() async {
+    final url = Uri.parse(Apis.savePersonalInfo);
+
+    final request = http.MultipartRequest("POST", url);
+    request.fields['appointment_id'] = widget.appointmentId.toString();
+    request.fields['clientName'] = _formData.clientName ?? "";
+    request.fields['propertyAddress'] = _formData.propertyAddress ?? "";
+    request.fields['inspectionDate'] = _formData.inspectionDate?.toIso8601String() ?? "";
+    request.fields['hasPhotoWithOwner'] = _formData.hasPhotoWithOwner == 'Yes' ? "true" : "false";
+    request.fields['image_reason'] = _formData.OwnerReason ?? "";
+    request.fields['zone'] = _formData.zone ?? "";
+    request.fields['typeOfLocality'] = _formData.typeOfLocality ?? "";
+    request.fields['typeOfColony'] = _formData.typeOfColony ?? "";
+
+    // Attach the image file if available
+    if (_formData.ownerImagePath != null) {
+      request.files.add(await http.MultipartFile.fromPath('imageFile', _formData.ownerImagePath!));
+    }
+
+    // Add authorization header
+    request.headers['Authorization'] = 'Bearer $_authToken';
+
+    try {
+      final response = await request.send();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseBody = await response.stream.bytesToString();
+        final responseData = jsonDecode(responseBody);
+
+        await _prefs!.setString("appointment_id", responseData['appointment_id'].toString());
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Personal information saved successfully!')),
+        );
+      } else if (response.statusCode == 302) {
+        final redirectUrl = response.headers['location'];
+
+        if (redirectUrl != null) {
+          try {
+            final redirectResponse = await http.get(
+              Uri.parse(redirectUrl),
+              headers: {'Authorization': 'Bearer $_authToken'},
+            );
+
+            if (redirectResponse.statusCode == 200) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Personal information saved after redirect!')),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Redirect failed: ${redirectResponse.statusCode}')),
+              );
+            }
+          } catch (redirectError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Redirect error: $redirectError')),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Missing redirect URL.')),
+          );
+        }
+      } else if (response.statusCode == 401) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Session expired. Please login again.')),
+        );
+        // Consider token refresh or redirection to login.
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save data. Code: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error occurred. Please try again.')),
+      );
+    }
+  }
+
 
   Future<void> _savePropertyInformation() async {
     final url = Uri.parse(Apis.savePropertyInformation);
 
-    String keyFormID =  _prefs!.getString("appointment_id")??"";
+    String keyFormID = _prefs!.getString("appointment_id") ?? "";
 
-    print("Auth Token2 (before request): $_authToken");
-    print("Form ID2(before request): $formID");
+    // print("Form ID2(before request): $formID");
 
     final headers = {
       'Content-Type': 'application/json',
@@ -618,9 +827,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
 
     });
 
-    print("API URL: $url");
-    print("API Body: $body");
-    print("API headers: $headers");
 
     try {
       final response = await http.post(
@@ -629,38 +835,35 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         body: body,
       );
 
-      print("API Response Status Code: ${response.statusCode}");
-      print("API Response Body: ${response.body}");
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
 
         // **NEW: Print decoded JSON with indentation for better readability**
-        JsonEncoder encoder = const JsonEncoder.withIndent('  '); // Add indent for readability
+        JsonEncoder encoder = const JsonEncoder.withIndent(
+            '  '); // Add indent for readability
         String prettyJson = encoder.convert(responseData);
-        print("Decoded JSON Response: \n$prettyJson");
 
-        print('Property Information saved successfully');
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Property information saved successfully!')));
+            const SnackBar(
+                content: Text('Property information saved successfully!')));
       } else {
-        print('Failed to save property information. Status code: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save property data. Error: ${response.statusCode}')));
+            SnackBar(content: Text(
+                'Failed to save property data. Error: ${response
+                    .statusCode}')));
       }
     } catch (e) {
-      print('Error saving property information: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Network error occurred. Please try again.')));
+          const SnackBar(
+              content: Text('Network error occurred. Please try again.')));
     }
   }
 
   Future<void> _saveLocationInformation() async {
     final url = Uri.parse(Apis.saveLocationInformation);
-    String formID =  _prefs!.getString("appointment_id")??"";
+    String formID = _prefs!.getString("appointment_id") ?? "";
 
-    print("Auth Token (before request3): $_authToken");
-    print("Form ID3(before request): $formID");
 
     final headers = {
       'Content-Type': 'application/json',
@@ -675,12 +878,9 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       'howItsCoveredSouth': _formData.howItsCoveredSouth,
       'howItsCoveredEast': _formData.howItsCoveredEast,
       'howItsCoveredWest': _formData.howItsCoveredWest,
-      'appointment_id': widget.appointmentId,  //Add appointment id
+      'appointment_id': widget.appointmentId, //Add appointment id
     });
 
-    print("API URL: $url");
-    print("API Body: $body");
-    print("API headers: $headers");
 
     try {
       final response = await http.post(
@@ -689,39 +889,36 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         body: body,
       );
 
-      print("API Response Status Code: ${response.statusCode}");
-      print("API Response Body: ${response.body}");
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-
         final responseData = jsonDecode(response.body);
 
 
-        JsonEncoder encoder = const JsonEncoder.withIndent('  '); // Add indent for readability
+        JsonEncoder encoder = const JsonEncoder.withIndent(
+            '  '); // Add indent for readability
         String prettyJson = encoder.convert(responseData);
-        print("Decoded JSON Response: \n$prettyJson");
 
-        print('Location Information saved successfully');
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location information saved successfully!')));
+            const SnackBar(
+                content: Text('Location information saved successfully!')));
       } else {
-        print('Failed to save location information. Status code: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save location data. Error: ${response.statusCode}')));
+            SnackBar(content: Text(
+                'Failed to save location data. Error: ${response
+                    .statusCode}')));
       }
     } catch (e) {
-      print('Error saving location information: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Network error occurred. Please try again.')));
+          const SnackBar(
+              content: Text('Network error occurred. Please try again.')));
     }
   }
 
-  Future<void> _saveMoreDetailsInformation() async {  // Added function for save data
+  Future<void> _saveMoreDetailsInformation() async {
+    // Added function for save data
     final url = Uri.parse(Apis.saveMoreDetails);
-    String formID =  _prefs!.getString("appointment_id")??"";
+    String formID = _prefs!.getString("appointment_id") ?? "";
 
-    print("Auth Token (before request3): $_authToken");
-    print("Form ID4(before request): $formID");
 
     final headers = {
       'Content-Type': 'application/json',
@@ -740,6 +937,16 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       'flooring': _formData.flooring,
       'woodWork': _formData.woodWork,
       'fittings': _formData.fittings,
+      'personContacted':_formData.personContacted,
+      'rentalRange':_formData.rentalRange,
+      'marketRate':_formData.marketRate,
+      'rentedArea': _formData.rentedArea,
+      'commercialArea': _formData.commercialArea,
+      'overHeadTank': _formData.overHeadTank,
+      'pump':_formData.pump,
+      'gpsCoordinates': _formData.gpsCoordinates,
+      'landmark':_formData.landmark,
+      'rentalRange': _formData.rentalRange,
       'appointment_id': widget.appointmentId, //Add appointment id
       'basementAccomodation': _formData.basementAccomodation,
       'basementActual': _formData.basementActual,
@@ -760,9 +967,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       'tfActual': _formData.tfActual,
       'tfPermissible': _formData.tfPermissible,
     });
-    print("API URL: $url");
-    print("API Body: $body");
-    print("API headers: $headers");
 
     try {
       final response = await http.post(
@@ -771,45 +975,44 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         body: body,
       );
 
-      print("API Response Status Code: ${response.statusCode}");
-      print("API Response Body: ${response.body}");
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-
         final responseData = jsonDecode(response.body);
 
         // **NEW: Print decoded JSON with indentation for better readability**
-        JsonEncoder encoder = const JsonEncoder.withIndent('  '); // Add indent for readability
+        JsonEncoder encoder = const JsonEncoder.withIndent(
+            '  '); // Add indent for readability
         String prettyJson = encoder.convert(responseData);
-        print("Decoded JSON Response: \n$prettyJson");
 
-        print('Additional Details Information saved successfully');
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Additional details saved successfully!')));
+            const SnackBar(
+                content: Text('Additional details saved successfully!')));
       } else {
-        print('Failed to save Additional details information. Status code: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save Additional details data. Error: ${response.statusCode}')));
+            SnackBar(content: Text(
+                'Failed to save Additional details data. Error: ${response
+                    .statusCode}')));
       }
     } catch (e) {
-      print('Error saving Additional details information: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Network error occurred. Please try again.')));
+          const SnackBar(
+              content: Text('Network error occurred. Please try again.')));
     }
   }
-  Future<void> _saveAdditionalDetailsInformation() async {  // Added function for save data
-    final url = Uri.parse(Apis.saveAdditionalDetails);
-    String formID =  _prefs!.getString("appointment_id")??"";
 
-    print("Auth Token (before request3): $_authToken");
-    print("Form ID5(before request): $formID");
+  Future<void> _saveAdditionalDetailsInformation() async {
+    // Added function for save data
+    final url = Uri.parse(Apis.saveAdditionalDetails);
+    String formID = _prefs!.getString("appointment_id") ?? "";
+
 
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $_authToken', // Correct format
     };
     final body = jsonEncode({
-      'applicableRate':_formData.applicableRate,
+      'appointment_id': widget.appointmentId, //Add appointment id
+      'applicableRate': _formData.applicableRate,
       'twoPropertyDealersName1': _formData.twoPropertyDealersName1,
       'twoPropertyDealersContact1': _formData.twoPropertyDealersContact1,
       'twoPropertyDealersName2': _formData.twoPropertyDealersName2,
@@ -821,9 +1024,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       'levelOfDevelopment': _formData.levelOfDevelopment,
       'housesInVicinity': _formData.housesInVicinity,
     });
-    print("API URL: $url");
-    print("API Body: $body");
-    print("API headers: $headers");
 
     try {
       final response = await http.post(
@@ -832,37 +1032,60 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         body: body,
       );
 
-      print("API Response Status Code: ${response.statusCode}");
-      print("API Response Body: ${response.body}");
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-
         final responseData = jsonDecode(response.body);
 
 
         JsonEncoder encoder = const JsonEncoder.withIndent('  ');
         String prettyJson = encoder.convert(responseData);
-        print("Decoded JSON Response: \n$prettyJson");
 
-        print('Additional Details Information saved successfully');
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Additional details saved successfully!')));
+            const SnackBar(
+                content: Text('Additional details saved successfully!')));
       } else {
-        print('Failed to save Additional details information. Status code: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save Additional details data. Error: ${response.statusCode}')));
+            SnackBar(content: Text(
+                'Failed to save Additional details data. Error: ${response
+                    .statusCode}')));
       }
     } catch (e) {
-      print('Error saving Additional details information: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Network error occurred. Please try again.')));
+          const SnackBar(
+              content: Text('Network error occurred. Please try again.')));
     }
   }
+
   // Helper method to log the form data as JSON
   void _logFormData() {
     final jsonData = jsonEncode(_formData.toJson());
-    print('Form Data: $jsonData');
   }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 1000,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          var ownerImageFile = File(pickedFile.path);
+          _formData.ownerImagePath = pickedFile.path;
+          _prefs?.setString(ownerImagePathKey, pickedFile.path);
+        });
+        widget.onFormDataChange(_formData);
+      }
+    } catch (e) {
+      if (mounted) { // Check if the widget is still in the tree
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -885,7 +1108,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         },
         onStepContinue: () {
           if (_currentStepIndex < _formSteps.length - 1) {
-            if (_formSteps[_currentStepIndex].currentState?.validate() ?? false) {
+            if (_formSteps[_currentStepIndex].currentState?.validate() ??
+                false) {
               _formSteps[_currentStepIndex].currentState?.save();
 
               // Log the form data *after* saving the step's data
@@ -894,7 +1118,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               // Print JSON data after saving each step
               if (_currentStepIndex == 0) {
                 // Call API to save personal information
-                _savePersonalInformation();
+                _savePersonalInfo2();
               }
               if (_currentStepIndex == 1) {
                 _savePropertyInformation();
@@ -913,9 +1137,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               });
             }
           } else {
-            if (_formSteps[_currentStepIndex].currentState?.validate() ?? false) {
+            if (_formSteps[_currentStepIndex].currentState?.validate() ??
+                false) {
               _formSteps[_currentStepIndex].currentState?.save();
-              _saveAdditionalDetailsInformation();  // Save additional details // save on previous button click
+              _saveAdditionalDetailsInformation(); // Save additional details // save on previous button click
               _logFormData(); // Log the form data before submitting
 
               widget.onFormSubmit(_formData);
@@ -940,7 +1165,9 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.black,
                 ),
-                child: Text(_currentStepIndex == _formSteps.length - 1 ? 'Submit' : 'Continue'),
+                child: Text(_currentStepIndex == _formSteps.length - 1
+                    ? 'Submit'
+                    : 'Continue'),
               ),
             ],
           );
@@ -987,242 +1214,274 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
 
   Widget _buildPersonalInformationForm() {
     return Form(
-        key: _formSteps[0],
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("1. Owner Name"),
-            SizedBox(
-              height: 40,
-              child: TextFormField(
-                controller: ownerNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Owner Name',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  isDense: true,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the Owner name';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _formData.clientName = value;
-                },
+      key: _formSteps[0],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("1. Owner Name"),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: TextFormField(
+              controller: ownerNameController,
+              decoration: const InputDecoration(
+                hintText: 'Owner Name',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
+              ),
+              validator: (value) =>
+              value == null || value.isEmpty ? 'Please enter the Owner name' : null,
+              onSaved: (value) => _formData.clientName = value,
+              onChanged: (value) {
+                _formData.clientName = value;
+                _prefs?.setString(clientNameKey, value);
+                widget.onFormDataChange(_formData);
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          const Text("2. Address"),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: TextFormField(
+              controller: propertyAddressController,
+              decoration: const InputDecoration(
+                hintText: 'Property Address',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
+              ),
+              validator: (value) =>
+              value == null || value.isEmpty ? 'Please enter the property address' : null,
+              onSaved: (value) => _formData.propertyAddress = value,
+              onChanged: (value) {
+                _formData.propertyAddress = value;
+                _prefs?.setString(propertyAddressKey, value);
+                widget.onFormDataChange(_formData);
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          const Text("3. Date"),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: TextFormField(
+              controller: inspectionDateController,
+              readOnly: true,
+              decoration: const InputDecoration(
+                hintText: 'Date',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
+              ),
+              onTap: () async {
+                DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: _formData.inspectionDate ?? DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (pickedDate != null) {
+                  setState(() {
+                    _formData.inspectionDate = pickedDate;
+                    inspectionDateController.text =
+                        DateFormat('dd/MM/yyyy').format(pickedDate);
+                  });
+                  _prefs?.setString(inspectionDateKey, pickedDate.toIso8601String());
+                  widget.onFormDataChange(_formData);
+                }
+              },
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          const Text("4. Photograph with the owner (Reason and Photo if No)"),
+          Row(
+            children: [
+              Radio<String>(
+                value: 'Yes',
+                groupValue: _formData.hasPhotoWithOwner,
                 onChanged: (value) {
-                  _formData.clientName = value;
-                  _prefs?.setString(clientNameKey, value);
+                  setState(() {
+                    _formData.hasPhotoWithOwner = value;
+                    _formData.OwnerReason = null;
+                    _formData.ownerImagePath = null;
+                    reasonController.clear();
+                    _prefs?.setString(hasPhotoWithOwnerKey, value!);
+                    _prefs?.remove(photoWithOwnerReasonKey!);
+                    _prefs?.remove(ownerImagePathKey);
+                  });
                   widget.onFormDataChange(_formData);
                 },
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text("2.Address"),
-            SizedBox(
-              height: 40,
-              child: TextFormField(
-                controller: propertyAddressController,
-                decoration: const InputDecoration(
-                  hintText: 'Property Address',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  isDense: true,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the property address';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _formData.propertyAddress = value;
-                },
+              const Text('Yes'),
+              Radio<String>(
+                value: 'No',
+                groupValue: _formData.hasPhotoWithOwner,
                 onChanged: (value) {
-                  _formData.propertyAddress = value;
-                  _prefs?.setString(propertyAddressKey, value);
+                  setState(() {
+                    _formData.hasPhotoWithOwner = value;
+                    _prefs?.setString(hasPhotoWithOwnerKey, value!);
+                  });
                   widget.onFormDataChange(_formData);
                 },
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text("3.Date"),
-            SizedBox(
-              height: 40,
-              child: TextFormField(
-                controller: inspectionDateController,
-                decoration: const InputDecoration(
-                  hintText: 'Date',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  isDense: true,
-                ),
-                onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: _formData.inspectionDate ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      _formData.inspectionDate = pickedDate;
-                      inspectionDateController.text = DateFormat('dd/MM/yyyy').format(pickedDate);
-                    });
-                    _prefs?.setString(inspectionDateKey, pickedDate.toIso8601String());
-                    widget.onFormDataChange(_formData);
-                  }
-                },
+              const Text('No'),
+            ],
+          ),
+
+          if (_formData.hasPhotoWithOwner == 'No') ...[
+            const SizedBox(height: 8),
+            TextField(
+              controller: reasonController,
+              decoration: const InputDecoration(
+                labelText: 'Reason for no photo',
+                hintText: 'Please provide a valid reason',
+                border: OutlineInputBorder(),
               ),
+              onChanged: (text) {
+                setState(() => _formData.OwnerReason = text);
+                _prefs?.setString(photoWithOwnerReasonKey!, text);
+                widget.onFormDataChange(_formData);
+              },
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
             ),
+          ],
+
+          if (_formData.hasPhotoWithOwner == 'Yes') ...[
             const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const Text(
+              "Upload supporting image:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text("4. Photograph with the owner(If No Reason)"),
-                Row(
-                  children: [
-                    Radio<String>(
-                      value: 'Yes',
-                      groupValue: _formData.hasPhotoWithOwner,
-                      onChanged: (value) {
-                        setState(() {
-                          _formData.hasPhotoWithOwner = value;
-                          _prefs?.setString(hasPhotoWithOwnerKey, value!);
-                        });
-                        widget.onFormDataChange(_formData);
-                      },
-                    ),
-                    const Text('Yes'),
-                    Radio<String>(
-                      value: 'No',
-                      groupValue: _formData.hasPhotoWithOwner,
-                      onChanged: (value) {
-                        setState(() {
-                          _formData.hasPhotoWithOwner = value;
-                          _prefs?.setString(hasPhotoWithOwnerKey, value!);
-                        });
-                        widget.onFormDataChange(_formData);
-                      },
-                    ),
-                    const Text('No'),
-                  ],
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text('Camera'),
+                  onPressed: () => _pickImage(ImageSource.camera),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Gallery'),
+                  onPressed: () => _pickImage(ImageSource.gallery),
                 ),
               ],
             ),
-            const SizedBox(height: 16), const Text("5. Zone"),
-            SizedBox(
-              height: 40,
-              child: DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  hintText: 'Select Zone',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  isDense: true,
-                ),
-                value: _formData.zone,
-                items: const <String>[
-                  'Central',
-                  'East',
-                  'West',
-                  'North',
-                  'South',
-                  'Haryana',
-                  'U.P.'
-                ].map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _formData.zone = newValue;
-                      _prefs?.setString(zoneKey, newValue);
-                    });
-                    widget.onFormDataChange(_formData);
-                  }
-                },
-                validator: (value) => value == null ? 'Please select a zone' : null,
-                onSaved: (String? value) {
-                  _formData.zone = value;
-                },
+            const SizedBox(height: 10),
+            if (_formData.ownerImagePath != null) ...[
+              Text("Selected Image:", style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Image.file(
+                    File(_formData.ownerImagePath!),
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text("6. Type of Locality"),
-            SizedBox(
-              height: 40,
-              child: DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  hintText: 'Select Locality Type',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  isDense: true,
-                ),
-                value: _formData.typeOfLocality,
-                items: const <String>[
-                  'Residential',
-                  'Commercial',
-                  'Industrial',
-                  'Agricultural'
-                ].map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _formData.typeOfLocality = newValue;
-                    _prefs?.setString(localityTypeKey, newValue!);
-                  });
-                  widget.onFormDataChange(_formData);
-                },
-                validator: (value) =>
-                value == null ? 'Please select a locality' : null,
-                onSaved: (String? value) {
-                  _formData.typeOfLocality = value;
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text("7. Type of Colony"),
-            SizedBox(
-              height: 40,
-              child: DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  hintText: 'Select Colony Type',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  isDense: true,
-                ),
-                value: _formData.typeOfColony,
-                items: const <String>['Authorised', 'UnAuthorised']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _formData.typeOfColony = newValue;
-                    _prefs?.setString(colonyTypeKey, newValue!);
-                  });
-                  widget.onFormDataChange(_formData);
-                },
-                validator: (value) =>
-                value == null ? 'Please select type of Colony' : null,
-                onSaved: (String? value) {
-                  _formData.typeOfColony = value;
-                },
-              ),
-            ),
+            ],
           ],
-        ));
+
+          const SizedBox(height: 16),
+          const Text("5. Zone"),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                hintText: 'Select Zone',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
+              ),
+              value: _formData.zone,
+              items: const ['Central', 'East', 'West', 'North', 'South', 'Haryana', 'U.P.']
+                  .map((value) => DropdownMenuItem(value: value, child: Text(value)))
+                  .toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _formData.zone = value;
+                    _prefs?.setString(zoneKey, value);
+                  });
+                  widget.onFormDataChange(_formData);
+                }
+              },
+              validator: (value) => value == null ? 'Please select a zone' : null,
+              onSaved: (value) => _formData.zone = value,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          const Text("6. Type of Locality"),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                hintText: 'Select Locality Type',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
+              ),
+              value: _formData.typeOfLocality,
+              items: const ['Residential', 'Commercial', 'Industrial', 'Agricultural']
+                  .map((value) => DropdownMenuItem(value: value, child: Text(value)))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _formData.typeOfLocality = value;
+                  _prefs?.setString(localityTypeKey, value!);
+                });
+                widget.onFormDataChange(_formData);
+              },
+              validator: (value) => value == null ? 'Please select a locality' : null,
+              onSaved: (value) => _formData.typeOfLocality = value,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          const Text("7. Type of Colony"),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 40,
+            child: DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                hintText: 'Select Colony Type',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
+              ),
+              value: _formData.typeOfColony,
+              items: const ['Authorised', 'UnAuthorised']
+                  .map((value) => DropdownMenuItem(value: value, child: Text(value)))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _formData.typeOfColony = value;
+                  _prefs?.setString(colonyTypeKey, value!);
+                });
+                widget.onFormDataChange(_formData);
+              },
+              validator: (value) => value == null ? 'Please select type of Colony' : null,
+              onSaved: (value) => _formData.typeOfColony = value,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildPropertyDetailsForm() {
@@ -1238,7 +1497,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               decoration: const InputDecoration(
                 hintText: 'Select Ownership Type',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 8),
                 isDense: true,
               ),
               value: _formData.typeOfOwnership,
@@ -1271,7 +1531,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               decoration: const InputDecoration(
                 hintText: 'Select Property Type',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 8),
                 isDense: true,
               ),
               value: _formData.typeOfProperty,
@@ -1311,7 +1572,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               decoration: const InputDecoration(
                 hintText: 'Select Neighbourhood Class',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 8),
                 isDense: true,
               ),
               value: _formData.neighborhoodClassification,
@@ -1334,7 +1596,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 });
                 widget.onFormDataChange(_formData);
               },
-              validator: (value) => value == null
+              validator: (value) =>
+              value == null
                   ? 'Please select Neighbourhood Classification'
                   : null,
               onSaved: (String? value) {
@@ -1360,7 +1623,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 decoration: const InputDecoration(
                   hintText: 'Select Occupation Status',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
                 value: _formData.occupationStatus,
@@ -1402,7 +1666,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       decoration: const InputDecoration(
                         hintText: 'Select Property Usage',
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         isDense: true,
                       ),
                       value: _formData.propertyUsage,
@@ -1442,11 +1707,16 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 decoration: const InputDecoration(
                   hintText: 'Select Property Location',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
                 value: _formData.locationOfProperty,
-                items: const <String>['Corner Plot', 'On Main Road', 'Inner Lane']
+                items: const <String>[
+                  'Corner Plot',
+                  'On Main Road',
+                  'Inner Lane'
+                ]
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -1476,7 +1746,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 decoration: const InputDecoration(
                   hintText: 'North',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
                 initialValue: _formData.howItsCoveredNorth,
@@ -1503,7 +1774,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 decoration: const InputDecoration(
                   hintText: 'South',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
                 initialValue: _formData.howItsCoveredSouth,
@@ -1530,7 +1802,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 decoration: const InputDecoration(
                   hintText: 'East',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
                 initialValue: _formData.howItsCoveredEast,
@@ -1557,7 +1830,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 decoration: const InputDecoration(
                   hintText: 'West',
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
                 initialValue: _formData.howItsCoveredWest,
@@ -1585,686 +1859,716 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     return Form(
         key: _formSteps[3],
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             const Text("15. If under const,Sanction Plan/Estimate seen"),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Radio<String>(
-                  value: 'Yes',
-                  groupValue: _formData.underSanctionPlan,
-                  onChanged: (value) {
-                    setState(() {
-                      _formData.underSanctionPlan = value;
-                      _prefs?.setString(sanctionPlanSeenKey, value!);
-                    });
-                    widget.onFormDataChange(_formData);
-                  },
-                ),
-                const Text('Yes'),
-                Radio<String>(
-                  value: 'No',
-                  groupValue: _formData.underSanctionPlan,
-                  onChanged: (value) {
-                    setState(() {
-                      _formData.underSanctionPlan = value;
-                      _prefs?.setString(sanctionPlanSeenKey, value!);
-                    });
-                    widget.onFormDataChange(_formData);
-                  },
-                ),
-                const Text('No'),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const Text("16. Is const.Acc to Sanction Plan "),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Radio<String>(
-                  value: 'Yes',
-                  groupValue: _formData.accToSanctionPlan,
-                  onChanged: (value) {
-                    setState(() {
-                      _formData.accToSanctionPlan = value;
-                      _prefs?.setString(accToSanctionPlanKey, value!);
-                    });
-                    widget.onFormDataChange(_formData);
-                  },
-                ),
-                const Text('Yes'),
-                Radio<String>(
-                  value: 'No',
-                  groupValue: _formData.accToSanctionPlan,
-                  onChanged: (value) {
-                    setState(() {
-                      _formData.accToSanctionPlan = value;
-                      _prefs?.setString(accToSanctionPlanKey, value!);
-                    });
-                    widget.onFormDataChange(_formData);
-                  },
-                ),
-                const Text('No'),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const Text("17. Type of Structure"),
-        SizedBox(
-          height: 40,
-          child: DropdownButtonFormField<String>(
-            decoration: const InputDecoration(
-              hintText: 'Select Structure Type',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              isDense: true,
-            ),
-            value: _formData.typeOfStructure, // Corrected here
-            items: const <String>['R.C.C.Framed Structure', 'Load bearing Wllas']
-                .map<DropdownMenuItem<String>> ((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _formData.typeOfStructure = newValue; // Corrected here
-              });
-              widget.onFormDataChange(_formData);
-            },
-            validator: (value) =>
-            value == null ? 'Please select Structure Type' : null,
-            onSaved: (String? value) {
-              _formData.typeOfStructure = value; // Corrected here
-            },
-          ),
-        ),
-        const SizedBox(height: 16),
-        const Text("18. Area of Plot"),
-        SizedBox(
-          height: 40,
-          child: TextFormField(
-            decoration: const InputDecoration(
-              hintText: 'Enter Plot Area',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              isDense: true,
-            ),
-            initialValue: _formData.areaOfPlot,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter area of plot';
-              }
-              return null;
-            },
-            onSaved: (value) {
-              _formData.areaOfPlot = value;
-            },
-            // inputFormatters: [
-            //   FilteringTextInputFormatter.allow(
-            //       RegExp(r'[0-9.]')),
-            // ],
-            // keyboardType: TextInputType.number,
-            onChanged: (value) {
-              _formData.areaOfPlot = value;
-              _prefs?.setString(plotAreaKey, value);
-              widget.onFormDataChange(_formData);
-            },
-          ),
-        ),
-        const SizedBox(height: 16),
-        if (_showNumberOfFloors)
-    Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-        const Text("19. No of Floors in Building"),
-    SizedBox(
-    height: 40,
-    child: TextFormField(
-    decoration: const InputDecoration(
-    hintText: 'Enter No. of Floors',
-    border: OutlineInputBorder(),
-    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    isDense: true,
-    ),
-    initialValue: _formData.numberOfFloors,
-    validator: (value) {
-    if (value == null || value.isEmpty) {
-    return 'Please enter the number of floors';
-    }
-    return null;
-    },
-    onSaved: (value) {
-    _formData.numberOfFloors = value;
-    },
-    inputFormatters: [
-    FilteringTextInputFormatter.digitsOnly,
-    ],
-      keyboardType: TextInputType.number,
-      onChanged: (value) {
-        _formData.numberOfFloors = value;
-        _prefs?.setString(numFloorsKey, value);
-        widget.onFormDataChange(_formData);
-      },
-    ),
-    ),
-          const SizedBox(height: 16),
-        ],
-    ),
-              if (_showFloorAtWhichFlatSituated)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Text("20. $_floorLabel"),  // Moved Text widget here
-                    SizedBox(
-                      height: 40,
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          hintText: _floorHintText,
-                          border: const OutlineInputBorder(),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          isDense: true,
-                        ),
-                        initialValue: _formData.floorOfFlat,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the Floor at which flat situated';
-                          }
-                          return null;
-                        },
-                        onSaved: (value) {
-                          _formData.floorOfFlat = value;
-                        },
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          _formData.floorOfFlat = value;
-                          _prefs?.setString(flatFloorKey,value);
-                          widget.onFormDataChange(_formData);
-                        },
-                      ),
+                    Radio<String>(
+                      value: 'Yes',
+                      groupValue: _formData.underSanctionPlan,
+                      onChanged: (value) {
+                        setState(() {
+                          _formData.underSanctionPlan = value;
+                          _prefs?.setString(sanctionPlanSeenKey, value!);
+                        });
+                        widget.onFormDataChange(_formData);
+                      },
                     ),
+                    const Text('Yes'),
+                    Radio<String>(
+                      value: 'No',
+                      groupValue: _formData.underSanctionPlan,
+                      onChanged: (value) {
+                        setState(() {
+                          _formData.underSanctionPlan = value;
+                          _prefs?.setString(sanctionPlanSeenKey, value!);
+                        });
+                        widget.onFormDataChange(_formData);
+                      },
+                    ),
+                    const Text('No'),
                   ],
                 ),
-              const SizedBox(height: 16),
-
-              if (_showFloorwiseInformationTable)
-                _buildFloorwiseInformationTable(),
-              const SizedBox(height: 16),
-              const Text("22. Year of Construction"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Construction Year',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  initialValue: _formData.yearOfConstruction,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the year of construction';
-                    }
-                    return null;
-                  },
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'[0-9.]')),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text("16. Is const.Acc to Sanction Plan "),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Radio<String>(
+                      value: 'Yes',
+                      groupValue: _formData.accToSanctionPlan,
+                      onChanged: (value) {
+                        setState(() {
+                          _formData.accToSanctionPlan = value;
+                          _prefs?.setString(accToSanctionPlanKey, value!);
+                        });
+                        widget.onFormDataChange(_formData);
+                      },
+                    ),
+                    const Text('Yes'),
+                    Radio<String>(
+                      value: 'No',
+                      groupValue: _formData.accToSanctionPlan,
+                      onChanged: (value) {
+                        setState(() {
+                          _formData.accToSanctionPlan = value;
+                          _prefs?.setString(accToSanctionPlanKey, value!);
+                        });
+                        widget.onFormDataChange(_formData);
+                      },
+                    ),
+                    const Text('No'),
                   ],
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    _formData.yearOfConstruction = value;
-                  },
                 ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text("17. Type of Structure"),
+            SizedBox(
+              height: 40,
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  hintText: 'Select Structure Type',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                value: _formData.typeOfStructure,
+                // Corrected here
+                items: const <String>[
+                  'R.C.C.Framed Structure',
+                  'Load bearing Wllas'
+                ]
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _formData.typeOfStructure = newValue; // Corrected here
+                  });
+                  widget.onFormDataChange(_formData);
+                },
+                validator: (value) =>
+                value == null ? 'Please select Structure Type' : null,
+                onSaved: (String? value) {
+                  _formData.typeOfStructure = value; // Corrected here
+                },
               ),
-              const SizedBox(height: 16),
-              const Text("23. External"),
-              SizedBox(
-                height: 40,
-                child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    hintText: 'Select External Finish',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
+            ),
+            const SizedBox(height: 16),
+            const Text("18. Area of Plot"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Plot Area',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                initialValue: _formData.areaOfPlot,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter area of plot';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.areaOfPlot = value;
+                },
+                // inputFormatters: [
+                //   FilteringTextInputFormatter.allow(
+                //       RegExp(r'[0-9.]')),
+                // ],
+                // keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  _formData.areaOfPlot = value;
+                  _prefs?.setString(plotAreaKey, value);
+                  widget.onFormDataChange(_formData);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (_showNumberOfFloors)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("19. No of Floors in Building"),
+                  SizedBox(
+                    height: 40,
+                    child: TextFormField(
+                      decoration: const InputDecoration(
+                        hintText: 'Enter No. of Floors',
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        isDense: true,
+                      ),
+                      initialValue: _formData.numberOfFloors,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter the number of floors';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _formData.numberOfFloors = value;
+                      },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        _formData.numberOfFloors = value;
+                        _prefs?.setString(numFloorsKey, value);
+                        widget.onFormDataChange(_formData);
+                      },
+                    ),
                   ),
-                  value: _formData.external,
-                  items: const <String>[
-                    'Snowcom',
-                    'Grit Wash',
-                    'Dholpur',
-                    'Marble',
-                    'Tiles'
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _formData.external = newValue;
-                    });
-                    widget.onFormDataChange(_formData);
-                  },
-                  validator: (value) =>
-                  value == null ? 'Please select external' : null,
-                  onSaved: (String? value) {
-                    _formData.external = value;
-                  },
-                ),
+                  const SizedBox(height: 16),
+                ],
               ),
-              const SizedBox(height: 16),
-              const Text("24. Internal"),
-              SizedBox(
-                height: 40,
-                child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    hintText: 'Select Internal Condition',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
+            if (_showFloorAtWhichFlatSituated)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("20. $_floorLabel"), // Moved Text widget here
+                  SizedBox(
+                    height: 40,
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        hintText: _floorHintText,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        isDense: true,
+                      ),
+                      initialValue: _formData.floorOfFlat,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter the Floor at which flat situated';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _formData.floorOfFlat = value;
+                      },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        _formData.floorOfFlat = value;
+                        _prefs?.setString(flatFloorKey, value);
+                        widget.onFormDataChange(_formData);
+                      },
+                    ),
                   ),
-                  value: _formData.internal,
-                  items: const <String>['Excellent', 'Good', 'Fair', 'Poor']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _formData.internal = newValue;
-                    });
-                    widget.onFormDataChange(_formData);
-                  },
-                  validator: (value) =>
-                  value == null ? 'Please select Internal' : null,
-                  onSaved: (String? value) {
-                    _formData.internal = value;
-                  },
-                ),
+                ],
               ),
-              const SizedBox(height: 16),
-              const Text("25. Flooring"),
-              SizedBox(
-                height: 40,
-                child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    hintText: 'Select Flooring Type',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  value: _formData.flooring,
-                  items: const <String>[
-                    'Kota',
-                    'Giazed',
-                    'Marble',
-                    'Mosaic',
-                    'Itallian Marble',
-                    'P.C.C',
-                    'V.Tiles'
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _formData.flooring = newValue;
-                    });
-                    widget.onFormDataChange(_formData);
-                  },
-                  validator: (value) =>
-                  value == null ? 'Please select Flooring' : null,
-                  onSaved: (String? value) {
-                    _formData.flooring = value;
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text("26. Wood Work"),
-              SizedBox(
-                height: 40,
-                child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    hintText: 'Select Wood Work Type',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  value: _formData.woodWork,
-                  items: const <String>['Panellied', 'Glazed', 'Toak', 'Flush', 'Tiles']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _formData.woodWork = newValue;
-                    });
-                    widget.onFormDataChange(_formData);
-                  },
-                  validator: (value) =>
-                  value == null ? 'Please select Wood Work' : null,
-                  onSaved: (String? value) {
-                    _formData.woodWork = value;
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text("27. Fittings"),
-              SizedBox(
-                height: 40,
-                child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
-                    hintText: 'Select Fittings Quality',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  value: _formData.fittings,
-                  items: const <String>['ISI', 'Ordinary', 'Superior']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _formData.fittings = newValue;
-                    });
-                    widget.onFormDataChange(_formData);
-                  },
-                  validator: (value) =>
-                  value == null ? 'Please select Fittings' : null,
-                  onSaved: (String? value) {
-                    _formData.fittings = value;
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text("28. Person Contacted at Site"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Person Contacted at Site',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  initialValue: _formData.contactedPersonKey,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Person Contacted at Site';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _formData.contactedPersonKey = value;
-                  },
-                  onChanged: (value) {
-                    _formData.contactedPersonKey = value;
-                    widget.onFormDataChange(_formData);
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text("29. Rental Range"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Rental Range',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  initialValue: _formData.rentalRange,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Rental Range';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _formData.rentalRange = value;
-                  },
-                  // inputFormatters: [
-                  //   FilteringTextInputFormatter.allow(
-                  //       RegExp(r'[0-9.]')),
-                  // ],
-                  // keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    _formData.rentalRange = value;
-                    widget.onFormDataChange(_formData);
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text("30. Market Rate of land in locality Area"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Market Rate',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  initialValue: _formData.marketRate,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Market Rate of land in locality Area';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _formData.marketRate = value;
-                  },
-                  onChanged: (value) {
-                    _formData.marketRate = value;
-                    widget.onFormDataChange(_formData);
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text("31. Rented Area of the Property"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Rented Area',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  initialValue: _formData.rentedArea,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Rented Area of the Property';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _formData.rentedArea = value;
-                  },
-                  onChanged: (value) {
-                    _formData.rentedArea = value;
-                    widget.onFormDataChange(_formData);
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text("32. Commercial Area of Property"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Commercial Area',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  initialValue: _formData.commercialArea,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Commercial Area of Property';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _formData.commercialArea = value;
-                  },
-                  onChanged: (value) {
-                    _formData.commercialArea = value;
-                    widget.onFormDataChange(_formData);
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text("33. Over Head Tank"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Over Head Tank Details',
+            const SizedBox(height: 16),
 
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  initialValue: _formData.overHeadTank,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Over Head Tank';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _formData.overHeadTank = value;
-                  },
-                  onChanged: (value) {
-                    _formData.overHeadTank = value;
-                    widget.onFormDataChange(_formData);
-                  },
+            if (_showFloorwiseInformationTable)
+              _buildFloorwiseInformationTable(),
+            const SizedBox(height: 16),
+            const Text("22. Year of Construction"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Construction Year',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
                 ),
+                initialValue: _formData.yearOfConstruction,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the year of construction';
+                  }
+                  return null;
+                },
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r'[0-9.]')),
+                ],
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  _formData.yearOfConstruction = value;
+                },
               ),
-              const SizedBox(height: 16),
-              const Text("34. Pump"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Pump Details',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  initialValue: _formData.pump,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Pump';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _formData.pump = value;
-                  },
-                  onChanged: (value) {
-                    _formData.pump = value;
-                    widget.onFormDataChange(_formData);
-                  },
+            ),
+            const SizedBox(height: 16),
+            const Text("23. External"),
+            SizedBox(
+              height: 40,
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  hintText: 'Select External Finish',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
                 ),
+                value: _formData.external,
+                items: const <String>[
+                  'Snowcem',
+                  'Grit Wash',
+                  'Dholpur',
+                  'Marble',
+                  'Tiles'
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _formData.external = newValue;
+                  });
+                  widget.onFormDataChange(_formData);
+                },
+                validator: (value) =>
+                value == null ? 'Please select external' : null,
+                onSaved: (String? value) {
+                  _formData.external = value;
+                },
               ),
-              const SizedBox(height: 16),
-              const Text("35. GPS Coordinates"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  controller: gpsCoordinatesController,
-                  decoration: InputDecoration(
-                      hintText: 'GPS Coordinates',
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      isDense: true,
-                      suffixIcon: IconButton(
-                          icon: const Icon(Icons.location_on),
-                          onPressed: () async {
-                            Position? position = await _getCurrentLocation();
-                            if (position != null) {
-                              setState(() {
-                                String coordinates =
-                                    "${position.latitude}, ${position.longitude}";
-                                gpsCoordinatesController.text = coordinates;
-                                _formData.gpsCoordinates = coordinates;
-                              });
-                              widget.onFormDataChange(_formData);
-                            }
+            ),
+            const SizedBox(height: 16),
+            const Text("24. Internal"),
+            SizedBox(
+              height: 40,
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  hintText: 'Select Internal Condition',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                value: _formData.internal,
+                items: const <String>['Excellent', 'Good', 'Fair', 'Poor']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _formData.internal = newValue;
+                  });
+                  widget.onFormDataChange(_formData);
+                },
+                validator: (value) =>
+                value == null ? 'Please select Internal' : null,
+                onSaved: (String? value) {
+                  _formData.internal = value;
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("25. Flooring"),
+            SizedBox(
+              height: 40,
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  hintText: 'Select Flooring Type',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                value: _formData.flooring,
+                items: const <String>[
+                  'Kota',
+                  'Granite',
+                  'Marble',
+                  'Mosaic',
+                  'Itallian Marble',
+                  'P.C.C.',
+                  'V Tiles'
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _formData.flooring = newValue;
+                  });
+                  widget.onFormDataChange(_formData);
+                },
+                validator: (value) =>
+                value == null ? 'Please select Flooring' : null,
+                onSaved: (String? value) {
+                  _formData.flooring = value;
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("26. Wood Work"),
+            SizedBox(
+              height: 40,
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  hintText: 'Select Wood Work Type',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                value: _formData.woodWork,
+                items: const <String>[
+                  'Panellied',
+                  'Glazed',
+                  'Teak',
+                  'Flush',
+                  'Almiraha',
+                  'Windows'
+                ]
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _formData.woodWork = newValue;
+                  });
+                  widget.onFormDataChange(_formData);
+                },
+                validator: (value) =>
+                value == null ? 'Please select Wood Work' : null,
+                onSaved: (String? value) {
+                  _formData.woodWork = value;
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("27. Fittings"),
+            SizedBox(
+              height: 40,
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  hintText: 'Select Fittings Quality',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                value: _formData.fittings,
+                items: const <String>['ISI', 'Ordinary', 'Superior']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _formData.fittings = newValue;
+                  });
+                  widget.onFormDataChange(_formData);
+                },
+                validator: (value) =>
+                value == null ? 'Please select Fittings' : null,
+                onSaved: (String? value) {
+                  _formData.fittings = value;
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("28. Person Contacted at Site"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Person Contacted at Site',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                initialValue: _formData.personContacted,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Person Contacted at Site';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.personContacted = value;
+                },
+                onChanged: (value) {
+                  _formData.personContacted = value;
+                  widget.onFormDataChange(_formData);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("29. Rental Range"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Rental Range',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                initialValue: _formData.rentalRange,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Rental Range';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.rentalRange = value;
+                },
+                // inputFormatters: [
+                //   FilteringTextInputFormatter.allow(
+                //       RegExp(r'[0-9.]')),
+                // ],
+                // keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  _formData.rentalRange = value;
+                  widget.onFormDataChange(_formData);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("30. Market Rate of land in locality Area"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Market Rate',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                initialValue: _formData.marketRate,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Market Rate of land in locality Area';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.marketRate = value;
+                },
+                onChanged: (value) {
+                  _formData.marketRate = value;
+                  widget.onFormDataChange(_formData);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("31. Rented Area of the Property"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Rented Area',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                initialValue: _formData.rentedArea,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Rented Area of the Property';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.rentedArea = value;
+                },
+                onChanged: (value) {
+                  _formData.rentedArea = value;
+                  widget.onFormDataChange(_formData);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("32. Commercial Area of Property"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Commercial Area',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                initialValue: _formData.commercialArea,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Commercial Area of Property';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.commercialArea = value;
+                },
+                onChanged: (value) {
+                  _formData.commercialArea = value;
+                  widget.onFormDataChange(_formData);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("33. Over Head Tank"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Over Head Tank Details',
+
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                initialValue: _formData.overHeadTank,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Over Head Tank';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.overHeadTank = value;
+                },
+                onChanged: (value) {
+                  _formData.overHeadTank = value;
+                  widget.onFormDataChange(_formData);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("34. Pump"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Pump Details',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
+                ),
+                initialValue: _formData.pump,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Pump';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.pump = value;
+                },
+                onChanged: (value) {
+                  _formData.pump = value;
+                  widget.onFormDataChange(_formData);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text("35. GPS Coordinates"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                controller: gpsCoordinatesController,
+                decoration: InputDecoration(
+                    hintText: 'GPS Coordinates',
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    isDense: true,
+                    suffixIcon: IconButton(
+                        icon: const Icon(Icons.location_on),
+                        onPressed: () async {
+                          Position? position = await _getCurrentLocation();
+                          if (position != null) {
+                            setState(() {
+                              String coordinates =
+                                  "${position.latitude}, ${position.longitude}";
+                              gpsCoordinatesController.text = coordinates;
+                              _formData.gpsCoordinates = coordinates;
+                            });
                             widget.onFormDataChange(_formData);
                           }
+                          widget.onFormDataChange(_formData);
+                        }
 
-                      )),
-                  readOnly: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please get GPS Coordinates';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _formData.gpsCoordinates = value;
-                  },
-                ),
+                    )),
+                readOnly: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please get GPS Coordinates';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.gpsCoordinates = value;
+                },
               ),
-              const SizedBox(height: 16),
-              const Text("36. Landmark"),
-              SizedBox(
-                height: 40,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    hintText: 'Enter Landmark',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    isDense: true,
-                  ),
-                  initialValue: _formData.landmark,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter Landmark';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _formData.landmark = value;
-                  },
-                  onChanged: (value) {
-                    _formData.landmark = value;
-                    widget.onFormDataChange(_formData);
-                  },
+            ),
+            const SizedBox(height: 16),
+            const Text("36. Landmark"),
+            SizedBox(
+              height: 40,
+              child: TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Enter Landmark',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 8),
+                  isDense: true,
                 ),
+                initialValue: _formData.landmark,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter Landmark';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _formData.landmark = value;
+                },
+                onChanged: (value) {
+                  _formData.landmark = value;
+                  widget.onFormDataChange(_formData);
+                },
               ),
-              const SizedBox(height: 16),
-            ],
+            ),
+            const SizedBox(height: 16),
+          ],
         ));
   }
 
@@ -2290,7 +2594,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       hintText: 'Enter rate',
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       isDense: true,
                     ),
                     onSaved: (value) {
@@ -2323,7 +2628,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     decoration: const InputDecoration(
                       hintText: 'Name',
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       isDense: true,
                     ),
                     onSaved: (value) {
@@ -2346,7 +2652,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     decoration: const InputDecoration(
                       hintText: 'Contact No.',
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       isDense: true,
                     ),
                     onSaved: (value) {
@@ -2362,7 +2669,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               ),
             ],
           ),
-          const SizedBox(height: 16), // Add space between the rows
+          const SizedBox(height: 16),
+          // Add space between the rows
           Row(
             children: [
               Expanded(
@@ -2373,7 +2681,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     decoration: const InputDecoration(
                       hintText: 'Name', // Changed Label
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       isDense: true,
                     ),
                     onSaved: (value) {
@@ -2396,7 +2705,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     decoration: const InputDecoration(
                       hintText: 'Contact No.',
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       isDense: true,
                     ),
                     onSaved: (value) {
@@ -2414,112 +2724,112 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
           ),
           const SizedBox(height: 16),
 
-          //38 Number
-          // const Text(
-          //   '39. Set Backs',
-          //   style: TextStyle(fontSize: 16),
-          // ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     Expanded(
-          //       child: SizedBox(
-          //         height: 40,
-          //         child: TextFormField(
-          //           controller: setBacksFrontController,
-          //           decoration: const InputDecoration(
-          //             labelText: 'Front',
-          //             border: OutlineInputBorder(),
-          //             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          //             isDense: true,
-          //           ),
-          //           onSaved: (value) {
-          //             _formData.setBacksFront = value;
-          //           },
-          //           onChanged: (value) {
-          //             _formData.setBacksFront = value;
-          //             _prefs?.setString(setbacksFrontKey, value);
-          //             widget.onFormDataChange(_formData);
-          //           },
-          //         ),
-          //       ),
-          //     ),
-          //     const SizedBox(width: 8),
-          //     Expanded(
-          //       child: SizedBox(
-          //         height: 40,
-          //         child: TextFormField(
-          //           controller: setBacksRearController,
-          //           decoration: const InputDecoration(
-          //             labelText: 'Rear',
-          //             border: OutlineInputBorder(),
-          //             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          //             isDense: true,
-          //           ),
-          //           onSaved: (value) {
-          //             _formData.setBacksRear = value;
-          //           },
-          //           onChanged: (value) {
-          //             _formData.setBacksRear = value;
-          //             _prefs?.setString(setbacksRearKey, value);
-          //             widget.onFormDataChange(_formData);
-          //           },
-          //         ),
-          //       ),
-          //     ),
-          //     const SizedBox(width: 8),
-          //     Expanded(
-          //       child: SizedBox(
-          //         height: 40,
-          //         child: TextFormField(
-          //           controller: setBacksSide1Controller,
-          //           decoration: const InputDecoration(
-          //             labelText: 'Side 1',
-          //             border: OutlineInputBorder(),
-          //             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          //             isDense: true,
-          //           ),
-          //           onSaved: (value) {
-          //             _formData.setBacksSide1 = value;
-          //           },
-          //           onChanged: (value) {
-          //             _formData.setBacksSide1 = value;
-          //             _prefs?.setString(setbacksSide1Key, value);
-          //             widget.onFormDataChange(_formData);
-          //           },
-          //         ),
-          //       ),
-          //     ),
-          //     const SizedBox(width: 8),
-          //     Expanded(
-          //       child: SizedBox(
-          //         height: 40,
-          //         child: TextFormField(
-          //           controller: setBacksSide2Controller,
-          //           decoration: const InputDecoration(
-          //             labelText: 'Side 2',
-          //             border: OutlineInputBorder(),
-          //             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          //             isDense: true,
-          //           ),
-          //           onSaved: (value) {
-          //             _formData.setBacksSide2 = value;
-          //           },
-          //           onChanged: (value) {
-          //             _formData.setBacksSide2 = value;
-          //             _prefs?.setString(setbacksSide2Key, value);
-          //             widget.onFormDataChange(_formData);
-          //           },
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          // const SizedBox(height: 16),
 
-          //39 Number
           const Text(
-            '40. Level of Development of Plots',
+            '39. Set Backs',
+            style: TextStyle(fontSize: 16),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: TextFormField(
+                    controller: setBacksFrontController,
+                    decoration: const InputDecoration(
+                      labelText: 'Front',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      isDense: true,
+                    ),
+                    onSaved: (value) {
+                      _formData.setBacksFront = value;
+                    },
+                    onChanged: (value) {
+                      _formData.setBacksFront = value;
+                      _prefs?.setString(setbacksFrontKey, value);
+                      widget.onFormDataChange(_formData);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: TextFormField(
+                    controller: setBacksRearController,
+                    decoration: const InputDecoration(
+                      labelText: 'Rear',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      isDense: true,
+                    ),
+                    onSaved: (value) {
+                      _formData.setBacksRear = value;
+                    },
+                    onChanged: (value) {
+                      _formData.setBacksRear = value;
+                      _prefs?.setString(setbacksRearKey, value);
+                      widget.onFormDataChange(_formData);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: TextFormField(
+                    controller: setBacksSide1Controller,
+                    decoration: const InputDecoration(
+                      labelText: 'Side 1',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      isDense: true,
+                    ),
+                    onSaved: (value) {
+                      _formData.setBacksSide1 = value;
+                    },
+                    onChanged: (value) {
+                      _formData.setBacksSide1 = value;
+                      _prefs?.setString(setbacksSide1Key, value);
+                      widget.onFormDataChange(_formData);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: TextFormField(
+                    controller: setBacksSide2Controller,
+                    decoration: const InputDecoration(
+                      labelText: 'Side 2',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      isDense: true,
+                    ),
+                    onSaved: (value) {
+                      _formData.setBacksSide2 = value;
+                    },
+                    onChanged: (value) {
+                      _formData.setBacksSide2 = value;
+                      _prefs?.setString(setbacksSide2Key, value);
+                      widget.onFormDataChange(_formData);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+         // 39 Number
+          const Text(
+            '39. Level of Development of Plots',
             style: TextStyle(fontSize: 16),
           ),
           RadioListTile<String>(
@@ -2665,131 +2975,133 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     );
   }
 
-  DataRow _buildFloorDataRow(
-      String floorName,
+  DataRow _buildFloorDataRow(String floorName,
       TextEditingController accomodationController,
       TextEditingController actualController,
-      TextEditingController permissibleController,
-      ) {
+      TextEditingController permissibleController,) {
     return DataRow(
-        cells: [
+      cells: [
         DataCell(Text(floorName)),
-    DataCell(
-    SizedBox(
-    width: 100.0,
-    height: 35,
-    child: TextFormField(
-    decoration: const InputDecoration(
-    hintText: 'Enter Accommodation',
-    border: OutlineInputBorder(),
-    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-    isDense: true,
-    ),
-    controller: accomodationController,
-    style: const TextStyle(fontSize: 14),
-    onChanged: (value) {
-    switch (floorName) {
-    case 'Basement':
-    _formData.basementAccomodation = value;
-    break;
-    case 'Mezzanine':
-    _formData.mezzAccomodation = value;
-    break;
-    case 'Ground Floor':
-    _formData.gfAccomodation = value;
-    break;
-    case 'First Floor':
-    _formData.ffAccomodation = value;
-    break;
-    case 'Second Floor':
-    _formData.sfAccomodation = value;
-    break;
-    case 'Third Floor':
-    _formData.tfAccomodation = value;
-    break;
-    }
-    widget.onFormDataChange(_formData);
-    },
-    ),
-    ),
-    ),
-    DataCell(
-    SizedBox(
-    width: 100.0,
-    height: 35,
-    child: TextFormField(
-    decoration: const InputDecoration(
-    hintText: 'Enter Actual',
-    border: OutlineInputBorder(),
-    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-    isDense: true,
-    ),
-    controller: actualController,
-    style: const TextStyle(fontSize: 14),
-    onChanged: (value) {
-    switch (floorName) {
-    case 'Basement':
-    _formData.basementActual = value;
-    break;
-    case 'Mezzanine':
-    _formData.mezzActual = value;
-    break;
-    case 'Ground Floor':
-    _formData.gfActual = value;
-    break;
-    case 'First Floor':
-    _formData.ffActual = value;
-    break;
-    case 'Second Floor':
-    _formData.sfActual = value;
-    break;
-    case 'Third Floor':
-    _formData.tfActual = value;
-    break;
-    }
-    widget.onFormDataChange(_formData);
-    },
-    ),
-    ),
-    ),
-    DataCell(
-    SizedBox(
-    width: 100.0,
-    height: 35,
-    child: TextFormField(
-    decoration: const InputDecoration(
-    hintText: 'Enter Permissible',
-    border: OutlineInputBorder(),
-    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-    isDense: true,
-    ),
-    controller: permissibleController,
-    style: const TextStyle(fontSize: 14),
-    onChanged: (value) {
-    switch (floorName) {
-    case 'Basement':
-    _formData.basementPermissible = value;
-    break;
-    case 'Mezzanine':
-    _formData.mezzPermissible = value;
-    break;
-    case 'Ground Floor':
-    _formData.gfPermissible = value;
-    break;
-    case 'First Floor':
-    _formData.ffPermissible = value;
-    break;                  case 'Second Floor':
-    _formData.sfPermissible = value;
-    break;
-    case 'Third Floor':
-    _formData.tfPermissible = value;
-    break;
-    }
-    widget.onFormDataChange(_formData);
-    },
-    ),
-    ),        ),
-        ],
+        DataCell(
+          SizedBox(
+            width: 100.0,
+            height: 35,
+            child: TextFormField(
+              decoration: const InputDecoration(
+                hintText: 'Enter Accommodation',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8, vertical: 5),
+                isDense: true,
+              ),
+              controller: accomodationController,
+              style: const TextStyle(fontSize: 14),
+              onChanged: (value) {
+                switch (floorName) {
+                  case 'Basement':
+                    _formData.basementAccomodation = value;
+                    break;
+                  case 'Mezzanine':
+                    _formData.mezzAccomodation = value;
+                    break;
+                  case 'Ground Floor':
+                    _formData.gfAccomodation = value;
+                    break;
+                  case 'First Floor':
+                    _formData.ffAccomodation = value;
+                    break;
+                  case 'Second Floor':
+                    _formData.sfAccomodation = value;
+                    break;
+                  case 'Third Floor':
+                    _formData.tfAccomodation = value;
+                    break;
+                }
+                widget.onFormDataChange(_formData);
+              },
+            ),
+          ),
+        ),
+        DataCell(
+          SizedBox(
+            width: 100.0,
+            height: 35,
+            child: TextFormField(
+              decoration: const InputDecoration(
+                hintText: 'Enter Actual',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8, vertical: 5),
+                isDense: true,
+              ),
+              controller: actualController,
+              style: const TextStyle(fontSize: 14),
+              onChanged: (value) {
+                switch (floorName) {
+                  case 'Basement':
+                    _formData.basementActual = value;
+                    break;
+                  case 'Mezzanine':
+                    _formData.mezzActual = value;
+                    break;
+                  case 'Ground Floor':
+                    _formData.gfActual = value;
+                    break;
+                  case 'First Floor':
+                    _formData.ffActual = value;
+                    break;
+                  case 'Second Floor':
+                    _formData.sfActual = value;
+                    break;
+                  case 'Third Floor':
+                    _formData.tfActual = value;
+                    break;
+                }
+                widget.onFormDataChange(_formData);
+              },
+            ),
+          ),
+        ),
+        DataCell(
+          SizedBox(
+            width: 100.0,
+            height: 35,
+            child: TextFormField(
+              decoration: const InputDecoration(
+                hintText: 'Enter Permissible',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8, vertical: 5),
+                isDense: true,
+              ),
+              controller: permissibleController,
+              style: const TextStyle(fontSize: 14),
+              onChanged: (value) {
+                switch (floorName) {
+                  case 'Basement':
+                    _formData.basementPermissible = value;
+                    break;
+                  case 'Mezzanine':
+                    _formData.mezzPermissible = value;
+                    break;
+                  case 'Ground Floor':
+                    _formData.gfPermissible = value;
+                    break;
+                  case 'First Floor':
+                    _formData.ffPermissible = value;
+                    break;
+                  case 'Second Floor':
+                    _formData.sfPermissible = value;
+                    break;
+                  case 'Third Floor':
+                    _formData.tfPermissible = value;
+                    break;
+                }
+                widget.onFormDataChange(_formData);
+              },
+            ),
+          ),),
+      ],
     );
   }
 }
@@ -2823,7 +3135,7 @@ class InspectionFormData {
   String? flooring;
   String? woodWork;
   String? fittings;
-  String? contactedPersonKey;
+  String? personContacted;
   String? rentalRange;
   String? marketRate;
   String? rentedArea;
@@ -2838,7 +3150,9 @@ class InspectionFormData {
   String? mezzAccomodation;
   String? mezzActual;
   String? mezzPermissible;
-  String? gfAccomodation;String? gfActual;  String? gfPermissible;
+  String? gfAccomodation;
+  String? gfActual;
+  String? gfPermissible;
   String? ffAccomodation;
   String? ffActual;
   String? ffPermissible;
@@ -2849,6 +3163,7 @@ class InspectionFormData {
   String? tfActual;
   String? tfPermissible;
   String? typeOfStructure;
+  String? OwnerReason;
   String? applicableRate;
   String? twoPropertyDealersName1;
   String? twoPropertyDealersContact1;
@@ -2862,6 +3177,7 @@ class InspectionFormData {
   String? levelOfDevelopment;
   String? housesInVicinity;
   String? appointment_id;
+  String? ownerImagePath;
 
   InspectionFormData({
     this.clientName,
@@ -2869,12 +3185,14 @@ class InspectionFormData {
     this.inspectionDate,
     this.hasPhotoWithOwner,
     this.zone,
+    this.ownerImagePath,
+    this.OwnerReason,
     this.typeOfLocality,
     this.typeOfColony,
     this.typeOfOwnership,
     this.typeOfProperty,
     this.neighborhoodClassification,
-    this.occupationStatus,this.propertyUsage,
+    this.occupationStatus, this.propertyUsage,
     this.locationOfProperty,
     this.howItsCoveredNorth,
     this.howItsCoveredSouth,
@@ -2891,7 +3209,7 @@ class InspectionFormData {
     this.flooring,
     this.woodWork,
     this.fittings,
-    this.contactedPersonKey,
+    this.personContacted,
     this.rentalRange,
     this.marketRate,
     this.rentedArea,
@@ -2965,7 +3283,7 @@ class InspectionFormData {
       'flooring': flooring,
       'woodWork': woodWork,
       'fittings': fittings,
-      'personContacted': contactedPersonKey,
+      'personContacted': personContacted,
       'rentalRange': rentalRange,
       'marketRate': marketRate,
       'rentedArea': rentedArea,
@@ -3006,4 +3324,48 @@ class InspectionFormData {
       'housesInVicinity': housesInVicinity,
     };
   }
+
+  // Add this method inside your _MyFormWidgetState class
+
+  // void _showImageSourceActionSheet(BuildContext context) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     builder: (
+  //         BuildContext buildContext) { // Use a different name for inner context
+  //       return SafeArea( // Ensures content is not obscured by notches etc.
+  //         child: Wrap( // Use Wrap to lay out children horizontally, then wrap to next line
+  //           children: <Widget>[
+  //             ListTile(
+  //               leading: const Icon(Icons.camera_alt),
+  //               title: const Text('Capture Photo from Camera'),
+  //               onTap: () {
+  //                 Navigator.pop(buildContext); // Close the bottom sheet
+  //                 _pickImage(ImageSource.camera);
+  //               },
+  //             ),
+  //             ListTile(
+  //               leading: const Icon(Icons.photo_library),
+  //               title: const Text('Select Photo from Gallery'),
+  //               onTap: () {
+  //                 Navigator.pop(buildContext); // Close the bottom sheet
+  //                 _pickImage(ImageSource.gallery);
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
+
+// void _clearOwnerImage() {
+//   setState(() {
+//     var ownerImageFile = null;
+//     _formData.ownerImagePath = null;
+//     _prefs?.remove(ownerImagePathKey);
+//   });
+//   widget.onFormDataChange(_formData);
+// }
+
 }
