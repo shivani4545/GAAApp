@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:gaa_adv/views/appointments/view_all_appointments.dart';
 import 'package:gaa_adv/views/upcoming_card.dart';
 import 'package:get/get.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
@@ -25,15 +26,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
       child: SalomonBottomBar(
         currentIndex: selectedIndex,
         onTap: (index) {
-          if (index == 1) {
-            // Dashboard
-            Get.to(() => const Dashboard());
-          } else if (index == 2) {
-            // Upcoming Appointment
-          //  Get.to(() => const UpcomingCard());
-          } else {
             onItemTapped(index); // Home or other future tabs
-          }
         },
         items: [
           SalomonBottomBarItem(

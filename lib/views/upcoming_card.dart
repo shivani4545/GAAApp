@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../models/inspection_data_form.dart';
 import 'camera_screen.dart';
 import 'field_engineer_form.dart';
 

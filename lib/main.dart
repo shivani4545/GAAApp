@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gaa_adv/controllers/appointment_controller.dart';
 import 'package:gaa_adv/controllers/attendace_controller.dart';
 import 'package:gaa_adv/controllers/auth_controller.dart';
+import 'package:gaa_adv/views/appointments/view_all_appointments.dart';
 import 'package:gaa_adv/views/camera.dart';
 import 'package:gaa_adv/views/camera_screen.dart';
 import 'package:gaa_adv/views/dashboard.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/dashboard', page: () => const Dashboard()),
         GetPage(name: '/camera', page: () => const ImageUploadScreen()),
+        GetPage(name: '/appointments', page: () => const ViewAllAppointments()),
        // GetPage(name: '/profile', page: () => const ImageUploadScreen()),
 
       ],

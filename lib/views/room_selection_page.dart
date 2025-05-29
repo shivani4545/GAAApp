@@ -8,10 +8,10 @@ class RoomCounter extends StatefulWidget {
   final ValueChanged<int> onCountChanged;
 
   const RoomCounter({
-    Key? key,
+    super.key,
     required this.roomType,
     required this.onCountChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<RoomCounter> createState() => _RoomCounterState();
@@ -89,7 +89,7 @@ class _RoomCounterState extends State<RoomCounter> {
 }
 
 class RoomSelectionPage extends StatefulWidget {
-  const RoomSelectionPage({Key? key}) : super(key: key);
+  const RoomSelectionPage({super.key});
 
   @override
   _RoomSelectionPageState createState() => _RoomSelectionPageState();
@@ -174,7 +174,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
         title: const Text('Home Inspection'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(10.0),
         child: ListView(
           children: [
             const Text("Select Property Type *"),
@@ -326,15 +326,21 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
                   ],
                 ),
               );
-            }).toList(),
+            }),
 
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: addRoom,
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10)))
+              ),
               child: const Text('Add Room'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10)))
+              ),
               onPressed: nextPage,
               child: const Text('Next'),
             ),
