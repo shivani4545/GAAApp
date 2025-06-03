@@ -169,7 +169,7 @@ class _HomeState extends State<Home> {
                               ),
                               onFormSubmit: (formData) {
 
-                                Get.to(()=>RoomSelectionPage());
+                                Get.to(()=>RoomSelectionPage(appID: appointmentController.upcomingAppointments[index].id.toString(),));
                               },
                               onFormDataChange: (formData) {
                               },

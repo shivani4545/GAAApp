@@ -38,7 +38,6 @@ class ViewAllAppointments extends StatelessWidget {
                                 shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
-
                                   child: const Center(child: Text("Current")),
                                 ),
                               ),

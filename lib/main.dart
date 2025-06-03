@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(), // Set the initial screen to SplashScreen
       getPages: [
         GetPage(name: '/dashboard', page: () => const Dashboard()),
-        GetPage(name: '/camera', page: () => const ImageUploadScreen()),
+        //GetPage(name: '/camera', page: () => const ImageUploadScreen()),
         GetPage(name: '/appointments', page: () => const ViewAllAppointments()),
        // GetPage(name: '/profile', page: () => const ImageUploadScreen()),
 

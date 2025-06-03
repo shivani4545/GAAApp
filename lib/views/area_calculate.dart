@@ -1,12 +1,18 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:gaa_adv/service/shared_pref_service.dart';
 import 'package:gaa_adv/views/camera_screen.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../utils/apis.dart';
+import 'package:http/http.dart' as http;
 class AreaCalculate extends StatefulWidget {
   final List<Map<String, dynamic>> roomDimensions;
-
-  const AreaCalculate({super.key, required this.roomDimensions});
+  final String appID;
+  const AreaCalculate({super.key, required this.roomDimensions,required this.appID});
 
   @override
   _AreaCalculateState createState() => _AreaCalculateState();
@@ -45,7 +51,7 @@ class _AreaCalculateState extends State<AreaCalculate> {
     });
   }
   Map<String, dynamic> content = new Map();
-  makeRequest(String totalArea,String valuePerUnit,String unit,String finalValue){
+  makeRequest(String totalArea,String valuePerUnit,String unit,String finalValue)async{
     content ={
       "totalArea":totalArea,
       "roomDetails":widget.roomDimensions,
@@ -53,9 +59,42 @@ class _AreaCalculateState extends State<AreaCalculate> {
       "unit":unit,
       "finalValue":finalValue
     };
-    Get.to(()=>ImageUploadScreen());
-    print("Final Data ${content}");
+
+    bool isSubmitted = await uploadRoomDetails(widget.appID,content);
+    if(isSubmitted){
+      Get.to(()=>ImageUploadScreen(appointmentID: widget.appID,));
+    }else{
+      Get.snackbar("Issue", "Data Not Submitted");
+    }
+
   }
+
+  Future<bool> uploadRoomDetails(String appointmentID,var content) async {
+    SharedPrefService sharedPrefService = SharedPrefService();
+    var token = await sharedPrefService.getAccessToken();
+    var userId = await sharedPrefService.getUserId();
+    print(jsonEncode(content));
+
+    try {
+      final uri = Uri.parse(Apis.uploadRoomDetails(appointmentID.toString()));
+      final header = {"Authorization": "Bearer $token","Content-Type": "application/json",};
+      final response = await http.post(uri,body: jsonEncode(content),headers: header);
+
+      print(uri);
+      print(header);
+
+      log("response ${response.body}");
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e.toString());
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double totalAreaInMeters = 0;

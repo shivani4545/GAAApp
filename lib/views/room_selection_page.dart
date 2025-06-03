@@ -89,7 +89,8 @@ class _RoomCounterState extends State<RoomCounter> {
 }
 
 class RoomSelectionPage extends StatefulWidget {
-  const RoomSelectionPage({super.key});
+  final String appID;
+  const RoomSelectionPage({super.key,required this.appID});
 
   @override
   _RoomSelectionPageState createState() => _RoomSelectionPageState();
@@ -158,7 +159,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DimensionInputPage(rooms: validRooms),
+        builder: (context) => DimensionInputPage(appID:widget.appID,rooms: validRooms),
       ),
     );
   }
@@ -177,65 +178,7 @@ class _RoomSelectionPageState extends State<RoomSelectionPage> {
         padding: const EdgeInsets.all(10.0),
         child: ListView(
           children: [
-            const Text("Select Property Type *"),
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              value: selectedPropertyType,
-              items: const [
 
-                DropdownMenuItem(
-                  value: "Independent Bunglow",
-                  child: Row(
-                    children: [
-                      Icon(Icons.bungalow_outlined),
-                      SizedBox(width: 8),
-                      Text("Independent Bunglow"),
-                    ],
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: " Society Flat",
-                  child: Row(
-                    children: [
-                      Icon(Icons.home_work_outlined),
-                      SizedBox(width: 8),
-                      Text("Society Flat"),
-                    ],
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: " Bulider Flat",
-                  child: Row(
-                    children: [
-                      Icon(Icons.home_work_outlined),
-                      SizedBox(width: 8),
-                      Text("Bulider Flat"),
-                    ],
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: " DDA Flat",
-                  child: Row(
-                    children: [
-                      Icon(Icons.home_outlined),
-                      SizedBox(width: 8),
-                      Text("DDA Flat"),
-                    ],
-                  ),
-                )
-              ],
-              onChanged: (value) {
-                setState(() {
-                  selectedPropertyType = value;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            // Room Counter
             const Text("Select Number of Rooms*"),
             RoomCounter(
               roomType: "Living Room",

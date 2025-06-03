@@ -13,4 +13,6 @@ class Apis {
   static const String saveMoreDetails = "${_baseUrl}save_more_details";
   static const String saveAdditionalDetails = "${_baseUrl}save_additional_details";
   static const String uploadImage = "${_baseUrl}upload_image";
+  static  String uploadRoomDetails(String appID) => "${_baseUrl}submitRoomDetails/$appID";
+  static  String getAppointmentDetail(String appID) => "${_baseUrl}appointments/$appID";
 }

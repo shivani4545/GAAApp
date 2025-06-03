@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:gaa_adv/views/summary_page.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/image_upload_list_response.dart';
@@ -8,7 +10,8 @@ import '../service/upload_img_service.dart';
 
 
 class ImageUploadScreen extends StatefulWidget {
-  const ImageUploadScreen({super.key});
+  final String appointmentID;
+  const ImageUploadScreen({super.key, required this.appointmentID});
 
   @override
   _ImageUploadScreenState createState() => _ImageUploadScreenState();
@@ -165,8 +168,6 @@ class ImageUploadScreen extends StatefulWidget {
     String displayMessage = _uiDisplayResult?['message'] ?? "Awaiting action.";
     bool wasServiceCallAttempted = _uiDisplayResult != null; // Indicates if an attempt was made
     bool wasServiceCallLocallySuccessful = _uiDisplayResult?['isServiceSuccess'] ?? false;
-
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Image Upload'),
@@ -214,35 +215,10 @@ class ImageUploadScreen extends StatefulWidget {
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15), textStyle: const TextStyle(fontSize: 16)),
               ),
               const SizedBox(height: 20),
-              if (wasServiceCallAttempted)
-                Card(
-                  elevation: 2,
-                  color: (wasServiceCallLocallySuccessful && displayApiSuccess) ? Colors.green[50] : Colors.red[50],
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            (wasServiceCallLocallySuccessful && displayApiSuccess) ? "Upload Success:" : "Upload Attempt Result:",
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: (wasServiceCallLocallySuccessful && displayApiSuccess) ? Colors.green[800] : Colors.red[800]
-                            )
-                        ),
-                        const SizedBox(height: 8),
-                        Text("API Success: $displayApiSuccess"),
-                        if (_uiDisplayResult?['statusCode'] != null) Text("Status Code: ${_uiDisplayResult!['statusCode']}"),
-                        Text('Message: $displayMessage'),
-                        if (kDebugMode && _uiDisplayResult?['errorBody'] != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text("Error Body (Debug):\n${_uiDisplayResult!['errorBody']}", style: const TextStyle(fontSize: 10)),
-                          )
-                      ],
-                    ),
-                  ),
-                ),
+              ElevatedButton(onPressed: (){
+                Get.to(()=>SummaryPage(appointmentId: widget.appointmentID));
+              }, child: Text("Review Appointment"))
+
             ],
           ),
         ),

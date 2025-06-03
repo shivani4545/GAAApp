@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gaa_adv/models/appointment_details.dart';
+import 'package:gaa_adv/service/shared_pref_service.dart';
 import 'package:gaa_adv/views/dimension_input_page.dart';
 import 'package:gaa_adv/views/room_selection_page.dart';
 import 'package:http/http.dart' as http;
@@ -184,6 +186,33 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
 
     _initializeForm(); // Renamed function
   }
+
+  Future<void> getSavedDetails() async {
+    SharedPrefService sharedPrefService = SharedPrefService();
+    var token = await sharedPrefService.getAccessToken();
+    var userId = await sharedPrefService.getUserId();
+    print(token);
+
+    try {
+      final uri = Uri.parse(Apis.getAppointmentDetail(widget.appointmentId.toString()));
+
+      final header = {"Authorization": "Bearer $token"};
+
+      final response = await http.get(uri, headers: header);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+        AppointmentDetails appointmentDetails = AppointmentDetails.fromJson(responseData);
+        //_initializeForm2(appointmentDetails);
+      } else {
+
+      }
+    } catch (e) {
+      Get.snackbar("Error", "${e.toString()}",duration: Duration(seconds: 3));
+    }
+  }
+
+
 
   Future<void> _initializeForm() async {
     _prefs = await SharedPreferences.getInstance();
@@ -751,12 +780,12 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     request.headers['Authorization'] = 'Bearer $_authToken';
 
     print(request.fields);
-    try {
-      final response = await request.send();
-      response.stream.transform(utf8.decoder).listen((value) {
-        print(value);
 
-      });
+      final response = await request.send();
+      // response.stream.transform(utf8.decoder).listen((value) {
+      //   print(value);
+      //
+      // });
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = await response.stream.bytesToString();
@@ -806,11 +835,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
           SnackBar(content: Text('Failed to save data. Code: ${response.statusCode}')),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Network error occurred. Please try again.')),
-      );
-    }
+
   }
 
   Future<void> _savePropertyInformation() async {
@@ -972,6 +997,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       'tfPermissible': _formData.tfPermissible,
     });
 
+    print(body);
     try {
       final response = await http.post(
         url,
@@ -984,7 +1010,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         final responseData = jsonDecode(response.body);
 
         JsonEncoder encoder = const JsonEncoder.withIndent('  '); //
-        Get.to(()=>RoomSelectionPage());// Add indent for readability
+        Get.to(()=>RoomSelectionPage(appID: widget.appointmentId.toString(),));// Add indent for readability
         String prettyJson = encoder.convert(responseData);
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -1027,6 +1053,8 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       'levelOfDevelopment': _formData.levelOfDevelopment,
       'housesInVicinity': _formData.housesInVicinity,
     });
+
+    print(body);
 
     try {
       final response = await http.post(
@@ -1131,7 +1159,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               }
               if (_currentStepIndex == 3) {
                 // Save More Details Information
-                //_saveMoreDetailsInformation();
+                _saveMoreDetailsInformation();
               }
 
               setState(() {

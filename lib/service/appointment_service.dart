@@ -12,6 +12,7 @@ class AppointmentService {
   Future<List<UpcomingAppointments>> getUpcomingAppointmentsToday() async {
     var token = await sharedPrefService.getAccessToken();
     var userId = await sharedPrefService.getUserId();
+    print(token);
 
     try {
       final uri = Uri.parse(Apis.upcomingAppointmentsToday(userId.toString()));

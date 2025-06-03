@@ -9,8 +9,9 @@ import 'room_selection_page.dart';
 
 class DimensionInputPage extends StatefulWidget {
   final List<Map<String, dynamic>> rooms;
+  final String appID;
 
-  DimensionInputPage({super.key, required this.rooms});
+  DimensionInputPage({super.key, required this.rooms,required this.appID});
 
   @override
   _DimensionInputPageState createState() => _DimensionInputPageState();
@@ -82,7 +83,7 @@ class _DimensionInputPageState extends State<DimensionInputPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AreaCalculate(roomDimensions: roomDimensions),
+        builder: (context) => AreaCalculate(appID:widget.appID,roomDimensions: roomDimensions),
       ),
     );
 
