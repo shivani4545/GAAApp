@@ -13,7 +13,12 @@ class UpcomingAppointments extends StatelessWidget {
         itemCount: appointmentController.upcomingAppointments.length,
         itemBuilder: (context,index){
           var data = appointmentController.upcomingAppointments[index];
-          return AppointmentCard(upcomingAppointments: data, onStartInspection: (){});
+          return AppointmentCard(
+              type: "upcoming",
+              upcomingAppointments: data,
+              onStartInspection: (){
+
+              });
         });
   }
 

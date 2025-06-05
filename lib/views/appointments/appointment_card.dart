@@ -7,12 +7,14 @@ import '../../models/upcoming_appointments.dart';
 class AppointmentCard extends StatelessWidget {
   final UpcomingAppointments upcomingAppointments;
   final VoidCallback onStartInspection;
+  final String type;
 
 
   const AppointmentCard({
     super.key,
     required this.upcomingAppointments,
-    required this.onStartInspection
+    required this.onStartInspection,
+    required this.type
   });
 
   @override
@@ -37,7 +39,7 @@ class AppointmentCard extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: onStartInspection,
                 icon: const Icon(Icons.play_arrow,color: Colors.white,),
-                label: const Text("Start Inspection",style: TextStyle(color: Colors.white),),
+                label:  Text(type=="current"?"Resume Inspection":type=="completed"?"View Summary":"Start Inspection",style: TextStyle(color: Colors.white),),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFF9CB47),
                   shape: RoundedRectangleBorder(

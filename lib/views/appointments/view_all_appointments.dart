@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gaa_adv/controllers/appointment_controller.dart';
 import 'package:gaa_adv/views/appointments/completed_appointments.dart';
+import 'package:gaa_adv/views/appointments/current_appointments.dart';
 import 'package:gaa_adv/views/appointments/upcoming_appointments.dart';
 import 'package:get/get.dart';
 
@@ -82,7 +83,7 @@ class ViewAllAppointments extends StatelessWidget {
                   ),
                   Expanded(
                       child: Container(
-                        child: controller.selectedIndex.value==0? Container():controller.selectedIndex.value ==1?UpcomingAppointments():controller.selectedIndex.value==2?CompletedAppointments():Container(),
+                        child: controller.selectedIndex.value==0? CurrentAppointments():controller.selectedIndex.value ==1?UpcomingAppointments():controller.selectedIndex.value==2?CompletedAppointments():Container(),
                       )
                   )
                 ])))

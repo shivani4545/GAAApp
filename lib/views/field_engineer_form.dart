@@ -25,7 +25,6 @@ class FieldEngineerForm extends StatefulWidget {
   final Function(InspectionFormData) onFormDataChange;
   final int appointmentId;
   final MediaType;
-
   const FieldEngineerForm({
     super.key,
     this.appointmentData,

@@ -17,7 +17,9 @@ class CompletedAppointments extends StatelessWidget {
         itemCount: appointmentController.completedAppointments.length,
         itemBuilder: (context,index){
           var data = appointmentController.completedAppointments[index];
-          return AppointmentCard(upcomingAppointments: data, onStartInspection: (){});
+          return AppointmentCard(
+              type: "completed",
+              upcomingAppointments: data, onStartInspection: (){});
         });
   }
 }

@@ -156,6 +156,7 @@ class _HomeState extends State<Home> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4.0),
                       child: AppointmentCard(
+                        type: "upcoming",
                         upcomingAppointments: appointmentController.upcomingAppointments[index],
                         onStartInspection: (){
                           if (appointmentController.upcomingAppointments[index].id != null) {

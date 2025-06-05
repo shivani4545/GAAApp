@@ -1,13 +1,11 @@
 import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-
 import '../models/appointment_details.dart';
 import '../service/shared_pref_service.dart';
 import '../utils/apis.dart';
+
 class SummaryPage extends StatefulWidget {
   final String appointmentId;
   const SummaryPage({super.key,required this.appointmentId});
@@ -17,7 +15,9 @@ class SummaryPage extends StatefulWidget {
 }
 
 class _SummaryPageState extends State<SummaryPage> {
+
   AppointmentDetails details = AppointmentDetails();
+
   Future<void> getSummaryData() async {
     SharedPrefService sharedPrefService = SharedPrefService();
     var token = await sharedPrefService.getAccessToken();

@@ -8,6 +8,7 @@ class Apis {
   static String attendance(String userId) => "${_baseUrl}attendance/$userId";
   static String upcomingAppointmentsToday(String userId) => "${_baseUrl}upcomingAppointmentToday/$userId";
   static const String savePersonalInfo = "${_baseUrl}save_personal_information";
+  static const String currentAppointments = "${_baseUrl}currentAppointment";
   static const String savePropertyInformation = "${_baseUrl}save_property_information";
   static const String saveLocationInformation = "${_baseUrl}save_location_information";
   static const String saveMoreDetails = "${_baseUrl}save_more_details";

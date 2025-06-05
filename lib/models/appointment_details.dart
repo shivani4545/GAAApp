@@ -60,6 +60,7 @@ class AdditionalDetails {
   String? setBacksSide2;
   String? levelOfDevelopment;
   int? housesInVicinity;
+  String? stageComplete;
 
   AdditionalDetails({
     this.applicableRate,
@@ -73,6 +74,7 @@ class AdditionalDetails {
     this.setBacksSide2,
     this.levelOfDevelopment,
     this.housesInVicinity,
+    this.stageComplete
   });
 
   factory AdditionalDetails.fromJson(Map<String, dynamic> json) => AdditionalDetails(
@@ -87,6 +89,7 @@ class AdditionalDetails {
     setBacksSide2: json["setBacksSide2"],
     levelOfDevelopment: json["levelOfDevelopment"],
     housesInVicinity: json["housesInVicinity"],
+    stageComplete: json["stage_complete"],
   );
 
   Map<String, dynamic> toJson() => {
