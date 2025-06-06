@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gaa_adv/models/appointment_details.dart';
 
 import 'package:gaa_adv/views/inspection_forms/personal_info_section.dart';
-import 'package:gaa_adv/views/inspection_forms/property_info_section.dart';
 
 import 'additional_details_screen.dart';
 import 'location_info_section.dart';
@@ -51,13 +50,7 @@ class _FieldEngineerFormState extends State<FieldEngineerFormOP> {
     ),
     Step(
       title: const Text("Property Info"),
-      content: PropertyInfoSection(
-        initialData: formData.propertyInfo,
-        onUpdate: (data) {
-          formData.propertyInfo = data;
-          updateForm(formData);
-        },
-      ),
+      content: Container(),
     ),
     Step(
       title: const Text("Location Info"),

@@ -61,10 +61,34 @@ class AppointmentService {
     }
   }
 
-  Future<AppointmentDetails> getAppointmentDetails(String appId) async {
+  Future<List<UpcomingAppointments>> getCompletedAppointments() async {
     var token = await sharedPrefService.getAccessToken();
     var userId = await sharedPrefService.getUserId();
     print(token);
+
+    try {
+      final uri = Uri.parse(Apis.completedAppointment);
+
+      final header = {"Authorization": "Bearer $token"};
+
+      final response = await http.get(uri, headers: header);
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+        List<UpcomingAppointments> attendanceStatusResponse =
+        upcomingAppointmentsFromJson(response.body);
+        return attendanceStatusResponse;
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<AppointmentDetails> getAppointmentDetails(String appId) async {
+    var token = await sharedPrefService.getAccessToken();
+    var userId = await sharedPrefService.getUserId();
 
     try {
       final uri = Uri.parse(Apis.getAppointmentDetail(appId));
@@ -72,6 +96,7 @@ class AppointmentService {
       final header = {"Authorization": "Bearer $token"};
 
       final response = await http.get(uri, headers: header);
+      log("Appointment Details : ${response.body}");
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);

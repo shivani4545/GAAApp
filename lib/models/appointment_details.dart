@@ -59,8 +59,13 @@ class AdditionalDetails {
   String? setBacksSide1;
   String? setBacksSide2;
   String? levelOfDevelopment;
-  int? housesInVicinity;
+  String? housesInVicinity;
   String? stageComplete;
+  int? underSanctionPlan;
+  int? accToSanctionPlan;
+  String? areaOfPlot;
+  dynamic numberOfFloors;
+  dynamic floorOfFlat;
 
   AdditionalDetails({
     this.applicableRate,
@@ -74,7 +79,12 @@ class AdditionalDetails {
     this.setBacksSide2,
     this.levelOfDevelopment,
     this.housesInVicinity,
-    this.stageComplete
+    this.stageComplete,
+    this.underSanctionPlan,
+    this.accToSanctionPlan,
+    this.areaOfPlot,
+    this.numberOfFloors,
+    this.floorOfFlat,
   });
 
   factory AdditionalDetails.fromJson(Map<String, dynamic> json) => AdditionalDetails(
@@ -88,8 +98,13 @@ class AdditionalDetails {
     setBacksSide1: json["setBacksSide1"],
     setBacksSide2: json["setBacksSide2"],
     levelOfDevelopment: json["levelOfDevelopment"],
-    housesInVicinity: json["housesInVicinity"],
-    stageComplete: json["stage_complete"],
+    housesInVicinity: json["housesInVicinity"].toString(),
+    stageComplete: json["stage_complete"].toString(),
+    underSanctionPlan: json["underSanctionPlan"],
+    accToSanctionPlan: json["accToSanctionPlan"],
+    areaOfPlot: json["areaOfPlot"],
+    numberOfFloors: json["numberOfFloors"],
+    floorOfFlat: json["floorOfFlat"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -149,6 +164,7 @@ class LocationInfo {
 
 class MoreDetails {
   dynamic underSanctionPlan;
+  dynamic applicableRate;
   dynamic accToSanctionPlan;
   dynamic areaOfPlot;
   dynamic numberOfFloors;
@@ -163,6 +179,7 @@ class MoreDetails {
   dynamic pump;
   dynamic moreDetailsExternal;
   dynamic internal;
+  dynamic external;
   dynamic flooring;
   dynamic woodWork;
   dynamic fittings;
@@ -171,6 +188,7 @@ class MoreDetails {
 
   MoreDetails({
     this.underSanctionPlan,
+    this.applicableRate,
     this.accToSanctionPlan,
     this.areaOfPlot,
     this.numberOfFloors,
@@ -185,6 +203,7 @@ class MoreDetails {
     this.pump,
     this.moreDetailsExternal,
     this.internal,
+    this.external,
     this.flooring,
     this.woodWork,
     this.fittings,
@@ -194,11 +213,12 @@ class MoreDetails {
 
   factory MoreDetails.fromJson(Map<String, dynamic> json) => MoreDetails(
     underSanctionPlan: json["underSanctionPlan"],
+    applicableRate: json["applicableRate"],
     accToSanctionPlan: json["accToSanctionPlan"],
     areaOfPlot: json["areaOfPlot"],
     numberOfFloors: json["numberOfFloors"],
     floorOfFlat: json["floorOfFlat"],
-    yearOfConstruction: json["yearOfConstruction"],
+    yearOfConstruction: json["yearOfConstruction"].toString(),
     personContacted: json["personContacted"],
     rentalRange: json["rentalRange"],
     marketRate: json["marketRate"],
@@ -207,6 +227,7 @@ class MoreDetails {
     overHeadTank: json["overHeadTank"],
     pump: json["pump"],
     moreDetailsExternal: json["external"],
+    external: json["external"],
     internal: json["internal"],
     flooring: json["flooring"],
     woodWork: json["woodWork"],

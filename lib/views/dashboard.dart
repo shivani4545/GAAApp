@@ -3,17 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:gaa_adv/controllers/appointment_controller.dart';
 import 'package:gaa_adv/controllers/attendace_controller.dart';
 import 'package:gaa_adv/controllers/auth_controller.dart';
-import 'package:gaa_adv/views/appointments/appointment_card.dart';
 import 'package:gaa_adv/views/appointments/view_all_appointments.dart';
 import 'package:gaa_adv/views/home.dart';
-import 'package:gaa_adv/views/upcoming_card.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import '../models/upcoming_appointments.dart';
-import 'bottom_nevigation_bar.dart';
 import 'drawer.dart';
-import 'field_engineer_form.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -63,10 +59,9 @@ class _DashboardState extends State<Dashboard> {
       ),
       body: IndexedStack(
         index: selectedIndex,
-        children: [
+        children: const [
           Home(),
           ViewAllAppointments(),
-          Container()
         ],
       ),
       bottomNavigationBar: Container(
@@ -89,11 +84,6 @@ class _DashboardState extends State<Dashboard> {
             SalomonBottomBarItem(
               icon: const Icon(Icons.dashboard),
               title: const Text("Appointments"),
-              selectedColor: const Color(0xff171433),
-            ),
-            SalomonBottomBarItem(
-              icon: const Icon(Icons.calendar_today),
-              title: const Text("Profile"),
               selectedColor: const Color(0xff171433),
             ),
           ],

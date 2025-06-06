@@ -6,20 +6,21 @@ import 'package:get/get.dart';
 class CompletedAppointments extends StatelessWidget {
   const CompletedAppointments({super.key});
 
-
   @override
   Widget build(BuildContext context) {
     final appointmentController = Get.find<AppointmentController>();
-    appointmentController.getCompletedAppointments();
-    return
-        appointmentController.isLoading.value?Center(child: CircularProgressIndicator(),):
-        ListView.builder(
+    return Obx(() => ListView.builder(
         itemCount: appointmentController.completedAppointments.length,
-        itemBuilder: (context,index){
+        itemBuilder: (context, index) {
           var data = appointmentController.completedAppointments[index];
           return AppointmentCard(
               type: "completed",
-              upcomingAppointments: data, onStartInspection: (){});
-        });
+              upcomingAppointments: data,
+              onStartInspection: () {
+                appointmentController.viewAppointmentDetailsPage(
+                    appointmentController.completedAppointments[index].id
+                        .toString());
+              });
+        }));
   }
 }

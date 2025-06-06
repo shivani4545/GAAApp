@@ -8,7 +8,6 @@ class UpcomingAppointments extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appointmentController = Get.find<AppointmentController>();
-    Get.put(AppointmentController().getUpcomingAppointments());
     return ListView.builder(
         itemCount: appointmentController.upcomingAppointments.length,
         itemBuilder: (context,index){
@@ -17,7 +16,7 @@ class UpcomingAppointments extends StatelessWidget {
               type: "upcoming",
               upcomingAppointments: data,
               onStartInspection: (){
-
+                appointmentController.resumeInspection(data.id.toString());
               });
         });
   }

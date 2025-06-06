@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gaa_adv/views/summary_page.dart';
+import 'package:gaa_adv/controllers/appointment_controller.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -17,6 +17,7 @@ class ImageUploadScreen extends StatefulWidget {
   _ImageUploadScreenState createState() => _ImageUploadScreenState();
 }
   class _ImageUploadScreenState extends State<ImageUploadScreen> {
+  final appController = Get.find<AppointmentController>();
   File? _image;
   final picker = ImagePicker();
   bool _isLoading = false; // Changed from _uploading for clarity
@@ -216,7 +217,7 @@ class ImageUploadScreen extends StatefulWidget {
               ),
               const SizedBox(height: 20),
               ElevatedButton(onPressed: (){
-                Get.to(()=>SummaryPage(appointmentId: widget.appointmentID));
+                appController.viewAppointmentDetailsPage(widget.appointmentID);
               }, child: Text("Review Appointment"))
 
             ],

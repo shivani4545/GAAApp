@@ -19,20 +19,16 @@ import 'package:get/get.dart';
 
 // Renamed class for clarity
 class FieldEngineerForm extends StatefulWidget {
-  final Map<String, dynamic>? appointmentData;
-  final InspectionFormData? initialFormData;
-  final Function(InspectionFormData) onFormSubmit;
-  final Function(InspectionFormData) onFormDataChange;
+  final AppointmentDetails? initialFormData;
+  final Function(AppointmentDetails) onFormSubmit;
+  final Function(AppointmentDetails) onFormDataChange;
   final int appointmentId;
-  final MediaType;
   const FieldEngineerForm({
     super.key,
-    this.appointmentData,
     this.initialFormData,
     required this.onFormSubmit,
     required this.onFormDataChange,
     required this.appointmentId,
-    required this.MediaType,
   });
 
   @override
@@ -42,82 +38,6 @@ class FieldEngineerForm extends StatefulWidget {
 
 class _FieldEngineerFormState extends State<FieldEngineerForm> {
   final ImagePicker _picker = ImagePicker();
-
-
-  // Preference Keys
-  static const String clientNameKey = 'clientName';
-  static const String propertyAddressKey = 'propertyAddress';
-  static const String inspectionDateKey = 'inspectionDate';
-  static const String hasPhotoWithOwnerKey = 'hasPhotoWithOwner';
-  static const String photoWithOwnerReasonKey = 'OwnerReason';
-  static const String zoneKey = 'zone';
-  static const String localityTypeKey = 'typeOfLocality';
-  static const String colonyTypeKey = 'typeOfColony';
-  static const String ownershipTypeKey = 'typeOfOwnership';
-  static const String propertyTypeKey = 'propertyType';
-  static const String neighborhoodClassKey = 'neighborhoodClassification';
-  static const String occupationStatusKey = 'occupationStatus';
-  static const String propertyUsageKey = 'propertyUsage';
-  static const String propertyLocationKey = 'locationOfProperty';
-  static const String coveredNorthKey = 'howItsCoveredNorth';
-  static const String coveredSouthKey = 'howItsCoveredSouth';
-  static const String coveredEastKey = 'howItsCoveredEast';
-  static const String coveredWestKey = 'howItsCoveredWest';
-  static const String sanctionPlanSeenKey = 'underSanctionPlan';
-  static const String accToSanctionPlanKey = 'accToSanctionPlan';
-  static const String plotAreaKey = 'areaOfPlot';
-  static const String numFloorsKey = 'numberOfFloors';
-  static const String flatFloorKey = 'floorOfFlat';
-  static const String constructionYearKey = 'yearOfConstruction';
-  static const String externalFinishKey = 'external';
-  static const String internalConditionKey = 'internal';
-  static const String flooringTypeKey = 'flooring';
-  static const String woodworkTypeKey = 'woodWork';
-  static const String fittingsQualityKey = 'fittings';
-  static const String contactedPersonKey = 'personContacted';
-  static const String rentalRangeKey = 'rentalRange';
-  static const String landMarketRateKey = 'marketRate';
-  static const String rentedAreaKey = 'rentedArea';
-  static const String commercialAreaKey = 'commercialArea';
-  static const String overheadTankDetailsKey = 'overHeadTank';
-  static const String overHeadTank = 'pump';
-  static const String gpsCoordinatesKey = 'gpsCoordinates';
-  static const String landmarkKey = 'landmark';
-  static const String basementAccommKey = 'basementAccomodation';
-  static const String basementActualKey = 'basementActual';
-  static const String basementPermissibleKey = 'basementPermissible';
-  static const String mezzAccommKey = 'mezzAccomodation';
-  static const String mezzActualKey = 'mezzActual';
-  static const String mezzPermissibleKey = 'mezzPermissible';
-  static const String gfAccommKey = 'gfAccomodation';
-  static const String gfActualKey = 'gfActual';
-  static const String gfPermissibleKey = 'gfPermissible';
-  static const String ffAccommKey = 'ffAccomodation';
-  static const String ffActualKey = 'ffActual';
-  static const String ffPermissibleKey = 'ffPermissible';
-  static const String sfAccommKey = 'sfAccomodation';
-  static const String sfActualKey = 'sfActual';
-  static const String sfPermissibleKey = 'sfPermissible';
-  static const String tfAccommKey = 'tfAccomodation';
-  static const String tfActualKey = 'tfActual';
-  static const String tfPermissibleKey = 'tfPermissible';
-  static const String structureTypeKey = 'typeOfStructure';
-  static const String applicableRateKey = 'applicableRate';
-  static const String dealerName1Key = 'twoPropertyDealersName1';
-  static const String dealerContact1Key = 'twoPropertyDealersContact1';
-  static const String dealerName2Key = 'twoPropertyDealersName2';
-  static const String dealerContact2Key = 'twoPropertyDealersContact2';
-  static const String setbacksFrontKey = 'setBacksFront';
-  static const String setbacksRearKey = 'setBacksRear';
-  static const String setbacksSide1Key = 'setBacksSide1';
-  static const String setbacksSide2Key = 'setBacksSide2';
-  static const String developmentLevelKey = 'levelOfDevelopment';
-  static const String housesVicinityKey = 'housesInVicinity';
-  static const String keyAccessToken = 'access_token'; // Key to store the auth token
-  static const String locationOfPropertyKey = 'locationOfProperty';
-  static const String keyFormID = "appointment_id";
-  static const String ownerImagePathKey = 'ownerImagePath';
-
 
   // Using a more descriptive name
   final List<GlobalKey<FormState>> _formSteps = [
@@ -129,7 +49,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   ];
 
   int _currentStepIndex = 0; // Renamed for clarity
-  InspectionFormData _formData = InspectionFormData();
+  AppointmentDetails _formData = AppointmentDetails();
   SharedPreferences? _prefs;
   String? _authToken; // Variable to store the authentication token
 
@@ -168,6 +88,22 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   final setBacksSide1Controller = TextEditingController();
   final setBacksSide2Controller = TextEditingController();
   final OwnerReasonController = TextEditingController();
+  final northCoverController = TextEditingController();
+  final southCoverController = TextEditingController();
+  final westCoverController = TextEditingController();
+  final eastCoverController = TextEditingController();
+  final plotAreaController = TextEditingController();
+  final numberOfFloorsController = TextEditingController();
+  final floorOfFlatController = TextEditingController();
+  final yearOfConstructionController = TextEditingController();
+  final personContacted = TextEditingController();
+  final rentalRangeController = TextEditingController();
+  final marketRateController = TextEditingController();
+  final rentedAreaController = TextEditingController();
+  final commercialAreaController = TextEditingController();
+  final overHeadTankController = TextEditingController();
+  final pumpController = TextEditingController();
+  final landmarkController = TextEditingController();
 
   List<String> _visibleFloors = []; // Renamed for better understanding
   bool _showNumberOfFloors = true;
@@ -182,7 +118,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   void initState() {
     super.initState();
     _housesInVicinity = 'Yes';
-
     _initializeForm(); // Renamed function
   }
 
@@ -211,311 +146,51 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     }
   }
 
-
-
   Future<void> _initializeForm() async {
+
     _prefs = await SharedPreferences.getInstance();
+    setState(() {
 
-    // Load initial data
-    _formData = widget.initialFormData ?? InspectionFormData();
+      _authToken = _prefs!.getString("access_token");
+      _formData = widget.initialFormData ?? AppointmentDetails();
+      ownerNameController.value = TextEditingValue(text: _formData.personalInfo?.clientName??"");
+      propertyAddressController.value = TextEditingValue(text: _formData.personalInfo?.propertyAddress??"");
+      inspectionDateController.value = TextEditingValue(text: _formData.personalInfo?.inspectionDate?.toIso8601String()??"");
 
-    // Load data from SharedPreferences (only on initial load)
-    _formData.clientName =
-        _prefs!.getString(clientNameKey) ?? _formData.clientName;
-    _formData.propertyAddress =
-        _prefs!.getString(propertyAddressKey) ?? _formData.propertyAddress;
-    _formData.applicableRate =
-        _prefs!.getString(applicableRateKey) ?? _formData.applicableRate;
-    _formData.twoPropertyDealersName1 =
-        _prefs!.getString(dealerName1Key) ?? _formData.twoPropertyDealersName1;
-    _formData.twoPropertyDealersContact1 =
-        _prefs!.getString(dealerContact1Key) ??
-            _formData.twoPropertyDealersContact2;
-    _formData.twoPropertyDealersName2 =
-        _prefs!.getString(dealerName2Key) ?? _formData.twoPropertyDealersName1;
-    _formData.twoPropertyDealersContact2 =
-        _prefs!.getString(dealerContact2Key) ??
-            _formData.twoPropertyDealersContact2;
+      eastCoverController.value = TextEditingValue(text: _formData.locationInfo?.howItsCoveredEast??"");
+      westCoverController.value = TextEditingValue(text: _formData.locationInfo?.howItsCoveredWest??"");
+      northCoverController.value = TextEditingValue(text: _formData.locationInfo?.howItsCoveredNorth??"");
+      southCoverController.value = TextEditingValue(text: _formData.locationInfo?.howItsCoveredSouth??"");
 
-    _formData.setBacksFront =
-        _prefs!.getString(setbacksFrontKey) ?? _formData.setBacksFront;
-    _formData.setBacksRear =
-        _prefs!.getString(setbacksRearKey) ?? _formData.setBacksRear;
-    _formData.setBacksSide1 =
-        _prefs!.getString(setbacksSide1Key) ?? _formData.setBacksSide1;
-    _formData.setBacksSide2 =
-        _prefs!.getString(setbacksSide2Key) ?? _formData.setBacksSide2;
-
-    String? housesInVicinity = _prefs!.getString(housesVicinityKey);
-    _housesInVicinity = housesInVicinity ?? 'Yes';
-
-    _formData.levelOfDevelopment =
-        _prefs!.getString(developmentLevelKey) ?? _formData.levelOfDevelopment;
-
-    String? dateString = _prefs!.getString(inspectionDateKey);
-    if (dateString != null) {
-      _formData.inspectionDate =
-          DateTime.tryParse(dateString) ?? _formData.inspectionDate;
-    }
-
-    // Populate form data from appointment data if available
-    if (widget.appointmentData != null) {
-      _formData = InspectionFormData(
-        clientName: widget.appointmentData!['clientName'] ??
-            _formData.clientName ?? '',
-        propertyAddress: widget.appointmentData!['propertyAddress'] ??
-            _formData.propertyAddress ?? '',
-        inspectionDate: widget.appointmentData!['inspectionDate'] != null
-            ? DateTime.tryParse(widget.appointmentData!['inspectionDate']) ??
-            _formData.inspectionDate
-            : _formData.inspectionDate,
-        hasPhotoWithOwner: widget.appointmentData!['hasPhotoWithOwner'] ??
-            _formData.hasPhotoWithOwner,
-        OwnerReason:widget.appointmentData!['OwnerReason']??_formData.OwnerReason,
-
-        zone: widget.appointmentData!['zone'] ?? _formData.zone,
-        typeOfLocality: widget.appointmentData!['typeOfLocality'] ??
-            _formData.typeOfLocality,
-        typeOfColony: widget.appointmentData!['typeOfColony'] ??
-            _formData.typeOfColony,
-        typeOfOwnership: widget.appointmentData!['typeOfOwnership'] ??
-            _formData.typeOfOwnership,
-        typeOfProperty: widget.appointmentData!['typeOfProperty'] ??
-            _formData.typeOfProperty,
-        neighborhoodClassification: widget
-            .appointmentData!['neighborhoodClassification'] ??
-            _formData.neighborhoodClassification,
-        occupationStatus: widget.appointmentData!['occupationStatus'] ??
-            _formData.occupationStatus,
-        propertyUsage: widget.appointmentData!['propertyUsage'] ??
-            _formData.propertyUsage,
-        locationOfProperty: widget.appointmentData!['locationOfProperty'] ??
-            _formData.locationOfProperty,
-        howItsCoveredNorth: widget.appointmentData!['howItsCoveredNorth'] ??
-            _formData.howItsCoveredNorth,
-        howItsCoveredSouth: widget.appointmentData!['howItsCoveredSouth'] ??
-            _formData.howItsCoveredSouth,
-        howItsCoveredEast: widget.appointmentData!['howItsCoveredEast'] ??
-            _formData.howItsCoveredEast,
-        howItsCoveredWest: widget.appointmentData!['howItsCoveredWest'] ??
-            _formData.howItsCoveredWest,
-        underSanctionPlan: widget.appointmentData!['underSanctionPlan'] ??
-            _formData.underSanctionPlan,
-        accToSanctionPlan: widget.appointmentData!['accToSanctionPlan'] ??
-            _formData.accToSanctionPlan,
-        areaOfPlot: widget.appointmentData!['areaOfPlot'] ??
-            _formData.areaOfPlot,
-        numberOfFloors: widget.appointmentData!['numberOfFloors'] ??
-            _formData.numberOfFloors,
-        floorOfFlat: widget.appointmentData!['floorOfFlat'] ??
-            _formData.floorOfFlat,
-        yearOfConstruction: widget.appointmentData!['yearOfConstruction'] ??
-            _formData.yearOfConstruction,
-        external: widget.appointmentData!['external'] ?? _formData.external,
-        internal: widget.appointmentData!['internal'] ?? _formData.internal,
-        flooring: widget.appointmentData!['flooring'] ?? _formData.flooring,
-        woodWork: widget.appointmentData!['woodWork'] ?? _formData.woodWork,
-        fittings: widget.appointmentData!['fittings'] ?? _formData.fittings,
-        personContacted: widget.appointmentData!['personContacted'] ??
-            _formData.personContacted,
-        rentalRange: widget.appointmentData!['rentalRange'] ??
-            _formData.rentalRange,
-        marketRate: widget.appointmentData!['marketRate'] ??
-            _formData.marketRate,
-        rentedArea: widget.appointmentData!['rentedArea'] ??
-            _formData.rentedArea,
-        commercialArea: widget.appointmentData!['commercialArea'] ??
-            _formData.commercialArea,
-        overHeadTank: widget.appointmentData!['overHeadTank'] ??
-            _formData.overHeadTank,
-        pump: widget.appointmentData!['pump'] ?? _formData.pump,
-        gpsCoordinates: widget.appointmentData!['gpsCoordinates'] ??
-            _formData.gpsCoordinates,
-        landmark: widget.appointmentData!['landmark'] ?? _formData.landmark,
-        basementAccomodation: widget.appointmentData!['basementAccomodation'] ??
-            _formData.basementAccomodation,
-        basementActual: widget.appointmentData!['basementActual'] ??
-            _formData.basementActual,
-        basementPermissible: widget.appointmentData!['basementPermissible'] ??
-            _formData.basementPermissible,
-        mezzAccomodation: widget.appointmentData!['mezzAccomodation'] ??
-            _formData.mezzAccomodation,
-        mezzActual: widget.appointmentData!['mezzActual'] ??
-            _formData.mezzActual,
-        mezzPermissible: widget.appointmentData!['mezzPermissible'] ??
-            _formData.mezzPermissible,
-        gfAccomodation: widget.appointmentData!['gfAccomodation'] ??
-            _formData.gfAccomodation,
-        gfActual: widget.appointmentData!['gfActual'] ?? _formData.gfActual,
-        gfPermissible: widget.appointmentData!['gfPermissible'] ??
-            _formData.gfPermissible,
-        ffAccomodation: widget.appointmentData!['ffAccomodation'] ??
-            _formData.ffAccomodation,
-        ffActual: widget.appointmentData!['ffActual'] ?? _formData.ffActual,
-        ffPermissible: widget.appointmentData!['ffPermissible'] ??
-            _formData.ffPermissible,
-        sfAccomodation: widget.appointmentData!['sfAccomodation'] ??
-            _formData.sfAccomodation,
-        sfActual: widget.appointmentData!['sfActual'] ?? _formData.sfActual,
-        sfPermissible: widget.appointmentData!['sfPermissible'] ??
-            _formData.sfPermissible,
-        tfAccomodation: widget.appointmentData!['tfAccomodation'] ??
-            _formData.tfAccomodation,
-        tfActual: widget.appointmentData!['tfActual'] ?? _formData.tfActual,
-        tfPermissible: widget.appointmentData!['tfPermissible'] ??
-            _formData.tfPermissible,
-        applicableRate: widget.appointmentData!['applicableRate'] ??
-            _formData.applicableRate,
-        twoPropertyDealersName1: widget
-            .appointmentData!['twoPropertyDealersName1'] ??
-            _formData.twoPropertyDealersName1,
-        twoPropertyDealersContact1: widget
-            .appointmentData!['twoPropertyDealersContact1'] ??
-            _formData.twoPropertyDealersContact1,
-        twoPropertyDealersName2: widget
-            .appointmentData!['twoPropertyDealersName2'] ??
-            _formData.twoPropertyDealersName2,
-        twoPropertyDealersContact2: widget
-            .appointmentData!['twoPropertyDealersContact2'] ??
-            _formData.twoPropertyDealersContact2,
-        setBacksFront: widget.appointmentData!['setBacksFront'] ??
-            _formData.setBacksFront,
-        setBacksRear: widget.appointmentData!['setBacksRear'] ??
-            _formData.setBacksRear,
-        setBacksSide1: widget.appointmentData!['setBacksSide1'] ??
-            _formData.setBacksSide1,
-        setBacksSide2: widget.appointmentData!['setBacksSide2'] ??
-            _formData.setBacksSide2,
-        levelOfDevelopment: widget.appointmentData!['levelOfDevelopment'] ??
-            _formData.levelOfDevelopment,
-        housesInVicinity: widget.appointmentData!['housesInVicinity'] ??
-            _formData.housesInVicinity,
-      );
-    }
-
-    //  Initialize housesInVicinity from initial data or widget data
-    _housesInVicinity = _formData.housesInVicinity ?? 'Yes';
-
-    // Load the auth token from Shared Preferences
-    _authToken = _prefs!.getString(keyAccessToken);
+      applicableRateController.value = TextEditingValue(text: _formData.moreDetails?.applicableRate??"");
+      twoPropertyDealersName1Controller.value = TextEditingValue(text: _formData.additionalDetails?.twoPropertyDealersName1??"");
+      twoPropertyDealersName2Controller.value = TextEditingValue(text: _formData.additionalDetails?.twoPropertyDealersName2??"");
+      plotAreaController.value = TextEditingValue(text: _formData.moreDetails?.areaOfPlot??"");
+      floorOfFlatController.value = TextEditingValue(text: _formData.moreDetails?.floorOfFlat??"");
+      yearOfConstructionController.value = TextEditingValue(text: _formData.moreDetails?.yearOfConstruction??"");
+      numberOfFloorsController.value = TextEditingValue(text: _formData.moreDetails?.numberOfFloors??"");
+      rentalRangeController.value = TextEditingValue(text: _formData.moreDetails?.rentalRange??"");
+      personContacted.value = TextEditingValue(text: _formData.moreDetails?.personContacted??"");
+      marketRateController.value = TextEditingValue(text: _formData.moreDetails?.marketRate??"");
+      rentedAreaController.value = TextEditingValue(text: _formData.moreDetails?.rentedArea??"");
+      commercialAreaController.value = TextEditingValue(text: _formData.moreDetails?.commercialArea??"");
+      overHeadTankController.value = TextEditingValue(text: _formData.moreDetails?.overHeadTank??"");
+      pumpController.value = TextEditingValue(text: _formData.moreDetails?.pump??"");
+      gpsCoordinatesController.value = TextEditingValue(text: _formData.moreDetails?.gpsCoordinates??"");
+      landmarkController.value = TextEditingValue(text: _formData.moreDetails?.landmark??"");
 
 
-    _saveInitialData();
-    // Populate controllers with form data
-    basementAccomodationController.text = _formData.basementAccomodation ?? '';
-    basementActualController.text = _formData.basementActual ?? '';
-    basementPermissibleController.text = _formData.basementPermissible ?? '';
-    mezzAccomodationController.text = _formData.mezzAccomodation ?? '';
-    mezzActualController.text = _formData.mezzActual ?? '';
-    mezzPermissibleController.text = _formData.mezzPermissible ?? '';
-    gfAccomodationController.text = _formData.gfAccomodation ?? '';
-    gfActualController.text = _formData.gfActual ?? '';
-    gfPermissibleController.text = _formData.gfPermissible ?? '';
-    ffAccomodationController.text = _formData.ffAccomodation ?? '';
-    ffActualController.text = _formData.ffActual ?? '';
-    ffPermissibleController.text = _formData.ffPermissible ?? '';
-    sfAccomodationController.text = _formData.sfAccomodation ?? '';
-    sfActualController.text = _formData.sfActual ?? '';
-    sfPermissibleController.text = _formData.sfPermissible ?? '';
-    tfAccomodationController.text = _formData.tfAccomodation ?? '';
-    tfActualController.text = _formData.tfActual ?? '';
-    tfPermissibleController.text = _formData.tfPermissible ?? '';
-    gpsCoordinatesController.text = _formData.gpsCoordinates ?? '';
-    ownerNameController.text = _formData.clientName ?? '';
-    propertyAddressController.text = _formData.propertyAddress ?? '';
-    inspectionDateController.text =
-    _formData.inspectionDate != null ? DateFormat('dd/MM/yyyy').format(
-        _formData.inspectionDate!) : '';
-    reasonController =
-        OwnerReasonController;
-    applicableRateController.text = _formData.applicableRate ?? '';
-    twoPropertyDealersName1Controller.text =
-        _formData.twoPropertyDealersName1 ?? '';
-    twoPropertyDealersContact1Controller.text =
-        _formData.twoPropertyDealersContact1 ?? '';
-    twoPropertyDealersName2Controller.text =
-        _formData.twoPropertyDealersName2 ?? '';
-    twoPropertyDealersContact2Controller.text =
-        _formData.twoPropertyDealersContact2 ?? '';
-    setBacksFrontController.text = _formData.setBacksFront ?? '';
-    setBacksRearController.text = _formData.setBacksRear ?? '';
-    setBacksSide1Controller.text = _formData.setBacksSide1 ?? '';
-    setBacksSide2Controller.text = _formData.setBacksSide2 ?? '';
-    _levelOfDevelopment = _formData.levelOfDevelopment;
+      setBacksFrontController.value = TextEditingValue(text: _formData.additionalDetails?.setBacksFront??"");
+      setBacksRearController.value = TextEditingValue(text: _formData.additionalDetails?.setBacksRear??"");
+      setBacksSide1Controller.value = TextEditingValue(text: _formData.additionalDetails?.setBacksSide1??"");
+      setBacksSide2Controller.value = TextEditingValue(text: _formData.additionalDetails?.setBacksSide2??"");
+      twoPropertyDealersContact1Controller.value = TextEditingValue(text: _formData.additionalDetails?.twoPropertyDealersContact1??"");
+      twoPropertyDealersContact2Controller.value = TextEditingValue(text: _formData.additionalDetails?.twoPropertyDealersContact2??"");
+
+    });
   }
 
-  Future<void> _saveInitialData() async {
-    await _prefs?.setString(clientNameKey, _formData.clientName ?? '');
-    await _prefs?.setString(
-        propertyAddressKey, _formData.propertyAddress ?? '');
-    await _prefs?.setString(
-        inspectionDateKey, _formData.inspectionDate?.toIso8601String() ?? '');
-    await _prefs?.setString(applicableRateKey, _formData.applicableRate ?? '');
-    await _prefs?.setString(
-        dealerName1Key, _formData.twoPropertyDealersName1 ?? '');
-    await _prefs?.setString(
-        dealerContact1Key, _formData.twoPropertyDealersContact1 ?? '');
-    await _prefs?.setString(
-        dealerName2Key, _formData.twoPropertyDealersName2 ?? '');
-    await _prefs?.setString(
-        dealerContact2Key, _formData.twoPropertyDealersContact2 ?? '');
-    await _prefs?.setString(setbacksFrontKey, _formData.setBacksFront ?? '');
-    await _prefs?.setString(setbacksRearKey, _formData.setBacksRear ?? '');
-    await _prefs?.setString(setbacksSide1Key, _formData.setBacksSide1 ?? '');
-    await _prefs?.setString(setbacksSide2Key, _formData.setBacksSide2 ?? '');
-    await _prefs?.setString(
-        developmentLevelKey, _formData.levelOfDevelopment ?? '');
-    await _prefs?.setString(housesVicinityKey, _housesInVicinity);
-    await _prefs?.setString(ownershipTypeKey,
-        _formData.typeOfOwnership ?? ''); // Save ownership type
-    await _prefs?.setString(
-        propertyTypeKey, _formData.typeOfProperty ?? ''); // Save property type
-    await _prefs?.setString(neighborhoodClassKey,
-        _formData.neighborhoodClassification ?? ''); //Save neighborhood
-    await _prefs?.setString(occupationStatusKey,
-        _formData.occupationStatus ?? ''); //Save occupation status
-    await _prefs?.setString(
-        propertyUsageKey, _formData.propertyUsage ?? ''); // save property usage
-    await _prefs?.setString(locationOfPropertyKey,
-        _formData.locationOfProperty ?? ''); // property location
-    await _prefs?.setString(externalFinishKey, _formData.external ?? '');
-    await _prefs?.setString(internalConditionKey, _formData.internal ?? '');
-    await _prefs?.setString(flooringTypeKey, _formData.flooring ?? '');
-    await _prefs?.setString(woodworkTypeKey, _formData.woodWork ?? '');
-    await _prefs?.setString(fittingsQualityKey, _formData.rentalRange ?? '');
-    await _prefs?.setString(
-        contactedPersonKey, _formData.personContacted ?? '');
-    await _prefs?.setString(rentalRangeKey, _formData.rentalRange ?? '');
-    await _prefs?.setString(landMarketRateKey, _formData.marketRate ?? '');
-    await _prefs?.setString(rentedAreaKey, _formData.rentedArea ?? '');
-    await _prefs?.setString(commercialAreaKey, _formData.commercialArea ?? '');
-    await _prefs?.setString(
-        overheadTankDetailsKey, _formData.overHeadTank ?? '');
-    await _prefs?.setString(overHeadTank, _formData.pump ?? '');
-    await _prefs?.setString(gpsCoordinatesKey, _formData.gpsCoordinates ?? '');
-    await _prefs?.setString(landmarkKey, _formData.landmark ?? '');
-    await _prefs?.setString(keyFormID, _formData.appointment_id ?? '');
-    await _prefs?.setString(basementAccommKey,_formData.basementAccomodation ??'');
-    await _prefs?.setString(basementActualKey, _formData.basementActual ?? '');
-    await _prefs?.setString(basementPermissibleKey,_formData.basementPermissible ?? '');
-    await _prefs?.setString(mezzAccommKey, _formData.mezzAccomodation ?? '');
-    await _prefs?.setString(mezzActualKey, _formData.mezzActual ?? '');
-    await _prefs?.setString(mezzPermissibleKey, _formData.mezzPermissible ?? '');
-    await _prefs?.setString(gfAccommKey, _formData.gfAccomodation ?? '');
-    await _prefs?.setString(gfPermissibleKey, _formData.gfPermissible ?? '');
-    await _prefs?.setString(gfActualKey, _formData.gfActual ?? '');
-    await _prefs?.setString(ffAccommKey, _formData.ffAccomodation ?? '');
-    await _prefs?.setString(ffActualKey, _formData.ffActual ?? '');
-    await _prefs?.setString(ffPermissibleKey, _formData.ffPermissible ?? '');
-    await _prefs?.setString(sfAccommKey, _formData.sfAccomodation ?? '');
-    await _prefs?.setString(sfActualKey, _formData.sfActual ?? '');
 
-
-
-    await _prefs?.setString(structureTypeKey, _formData.typeOfStructure ?? '');
-  }
-
-  // Renamed function for clarity
   void _updateVisibleFloors(String? propertyType) {
     setState(() {
       _showNumberOfFloors = true;
@@ -642,149 +317,31 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     return await Geolocator.getCurrentPosition();
   }
 
-  Future<void> _savePersonalInfo() async {
-    final url = Uri.parse(Apis.savePersonalInfo);
-   var request = http.MultipartRequest("post", url);
-   request.fields['appointment_id']=widget.appointmentId.toString();
-   request.fields['clientName']=_formData.clientName??"";
-   request.fields['propertyAddress']=_formData.propertyAddress??"";
-   request.fields['inspectionDate']=_formData.inspectionDate!.toIso8601String();
-   request.fields['hasPhotoWithOwner']=_formData.hasPhotoWithOwner == 'Yes' ? "true" : "false";
-   request.fields['image_reason']=_formData.OwnerReason??"";
-   request.fields['zone']=_formData.zone??"";
-   request.fields['typeOfLocality']=_formData.typeOfLocality??"";
-   request.fields['typeOfColony']=_formData.typeOfColony??"";
-   request.files.add(await http.MultipartFile.fromPath('imageFile',_formData.ownerImagePath!));
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $_authToken',
-      // Make sure this is the correct format
-    };
-    final body = jsonEncode({
-      'appointment_id': widget.appointmentId, // Add appointment ID
-      'clientName': _formData.clientName,
-      'propertyAddress': _formData.propertyAddress,
-      'inspectionDate': _formData.inspectionDate?.toIso8601String(),
-      'hasPhotoWithOwner': _formData.hasPhotoWithOwner == 'Yes' ? "true" : "false",
-     // 'image_reason':_formData.image_reason,
-      'owner_image':_formData.OwnerReason,
-      'zone': _formData.zone,
-      'typeOfLocality': _formData.typeOfLocality,
-      'typeOfColony': _formData.typeOfColony,
-
-    });
-
-
-    try {
-      final response = await http.post(
-        url,
-        headers: headers,
-        body: body,
-        //allow_redirects: true,  // Try with automatic redirects first
-      );
-
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-
-        JsonEncoder encoder = const JsonEncoder.withIndent(
-            '  '); // Add indent for readability
-        String prettyJson = encoder.convert(responseData);
-
-        await _prefs!.setString(
-            "appointment_id", responseData['appointment_id'].toString());
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Personal information saved successfully!')));
-      } else if (response.statusCode == 302) {
-        // --- Manual Redirect Handling ---
-        final redirectUrl = response.headers['location'];
-
-        if (redirectUrl != null) {
-
-          try {
-            final redirectResponse = await http.get(
-              Uri.parse(redirectUrl),
-              headers: headers, // Pass the headers including Authorization
-            );
-
-
-            if (redirectResponse.statusCode == 200) {
-              final redirectResponseData = jsonDecode(redirectResponse.body);
-              // **NEW: Print decoded JSON with indentation for better readability**
-              JsonEncoder encoder = const JsonEncoder.withIndent(
-                  '  '); // Add indent for readability
-              String prettyJson = encoder.convert(redirectResponseData);
-
-              // Success after redirecting!
-              ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text(
-                      'Personal information saved successfully ')));
-            } else {
-              // Handle the error after redirecting
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(
-                      'Failed to save data after redirect. Error: ${redirectResponse
-                          .statusCode}')));
-            }
-          } catch (redirectError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Error during redirect: $redirectError')));
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text(
-                  'Redirection URL missing in the Location header!')));
-        }
-      }
-      else if (response.statusCode == 401) {
-        // Token might be expired
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Session expired. Please login again.')));
-
-      }
-      else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(
-                'Failed to save data. Error: ${response.statusCode}')));
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Network error occurred. Please try again.')));
-    }
-  }
 
   Future<void> _savePersonalInfo2() async {
     final url = Uri.parse(Apis.savePersonalInfo);
 
-    log("File Path ${_formData.ownerImagePath}");
+    log("File Path ${_formData.personalInfo?.imagePath}");
     final request = http.MultipartRequest("POST", url);
-    request.fields['appointment_id'] = widget.appointmentId.toString();
-    request.fields['clientName'] = _formData.clientName ?? "";
-    request.fields['propertyAddress'] = _formData.propertyAddress ?? "";
-    request.fields['inspectionDate'] = _formData.inspectionDate?.toIso8601String() ?? "";
-    request.fields['hasPhotoWithOwner'] = _formData.hasPhotoWithOwner??"";
-    request.fields['image_reason'] = _formData.OwnerReason ?? "";
-    request.fields['zone'] = _formData.zone ?? "";
-    request.fields['typeOfLocality'] = _formData.typeOfLocality ?? "";
-    request.fields['typeOfColony'] = _formData.typeOfColony ?? "";
+    request.fields['appointment_id']=widget.appointmentId.toString();
+    request.fields['clientName']=_formData.personalInfo?.clientName??"";
+    request.fields['propertyAddress']=_formData.personalInfo?.propertyAddress??"";
+    request.fields['inspectionDate']=_formData.personalInfo?.inspectionDate!.toString()??"";
+    request.fields['hasPhotoWithOwner']=_formData.personalInfo?.hasPhotoWithOwner == 'Yes' ? "true" : "false";
+    request.fields['image_reason']=_formData.personalInfo?.imageReason??"";
+    request.fields['zone']=_formData.personalInfo?.zone??"";
+    request.fields['typeOfLocality']=_formData.personalInfo?.typeOfLocality??"";
+    request.fields['typeOfColony']=_formData.personalInfo?.typeOfColony??"";
 
-    if (_formData.ownerImagePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('owner_image', _formData.ownerImagePath!));
+    if (_formData.personalInfo?.imagePath != null) {
+      request.files.add(await http.MultipartFile.fromPath('owner_image', _formData.personalInfo?.imagePath!??""));
     }
     request.headers['Authorization'] = 'Bearer $_authToken';
 
     print(request.fields);
 
       final response = await request.send();
-      // response.stream.transform(utf8.decoder).listen((value) {
-      //   print(value);
-      //
-      // });
+
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = await response.stream.bytesToString();
@@ -838,9 +395,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
   }
 
   Future<void> _savePropertyInformation() async {
+    print("Here");
     final url = Uri.parse(Apis.savePropertyInformation);
 
-    String keyFormID = _prefs!.getString("appointment_id") ?? "";
+    String accessToken = _prefs!.getString("access_token") ?? "";
 
     final headers = {
       'Content-Type': 'application/json',
@@ -848,12 +406,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     };
 
     final body = jsonEncode({
-      'typeOfOwnership': _formData.typeOfOwnership,
-      'typeOfProperty': _formData.typeOfProperty,
-      'neighborhoodClassification': _formData.neighborhoodClassification,
+      'typeOfOwnership': _formData.propertyInfo?.typeOfOwnership,
+      'typeOfProperty': _formData.propertyInfo?.typeOfProperty,
+      'neighborhoodClassification': _formData.propertyInfo?.neighborhoodClassification,
       'appointment_id': widget.appointmentId, // Add appointment ID
 
     });
+
+    print(body);
 
 
     try {
@@ -864,6 +424,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       );
 
 
+      log("property type:${response.body}");
       if (response.statusCode == 201 || response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
 
@@ -899,13 +460,13 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     };
 
     final body = jsonEncode({
-      'occupationStatus': _formData.occupationStatus,
-      'propertyUsage': _formData.propertyUsage,
-      'locationOfProperty': _formData.locationOfProperty,
-      'howItsCoveredNorth': _formData.howItsCoveredNorth,
-      'howItsCoveredSouth': _formData.howItsCoveredSouth,
-      'howItsCoveredEast': _formData.howItsCoveredEast,
-      'howItsCoveredWest': _formData.howItsCoveredWest,
+      'occupationStatus': _formData.locationInfo?.occupationStatus,
+      'propertyUsage': _formData.locationInfo?.propertyUsage,
+      'locationOfProperty': _formData.locationInfo?.locationOfProperty,
+      'howItsCoveredNorth': _formData.locationInfo?.howItsCoveredNorth,
+      'howItsCoveredSouth': _formData.locationInfo?.howItsCoveredSouth,
+      'howItsCoveredEast': _formData.locationInfo?.howItsCoveredEast,
+      'howItsCoveredWest': _formData.locationInfo?.howItsCoveredWest,
       'appointment_id': widget.appointmentId, //Add appointment id
     });
 
@@ -953,47 +514,46 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       'Authorization': 'Bearer $_authToken', // Correct format
     };
     final body = jsonEncode({
-      'underSanctionPlan': _formData.underSanctionPlan == 'Yes' ? true : false,
-      'accToSanctionPlan': _formData.accToSanctionPlan == 'Yes' ? true : false,
-      'typeOfStructure': _formData.typeOfStructure,
-      'areaOfPlot': _formData.areaOfPlot,
-      'numberOfFloors': _formData.numberOfFloors,
-      'floorOfFlat': _formData.floorOfFlat,
-      'yearOfConstruction': _formData.yearOfConstruction,
-      'external': _formData.external,
-      'internal': _formData.internal,
-      'flooring': _formData.flooring,
-      'woodWork': _formData.woodWork,
-      'fittings': _formData.fittings,
-      'personContacted':_formData.personContacted,
-      'rentalRange':_formData.rentalRange,
-      'marketRate':_formData.marketRate,
-      'rentedArea': _formData.rentedArea,
-      'commercialArea': _formData.commercialArea,
-      'overHeadTank': _formData.overHeadTank,
-      'pump':_formData.pump,
-      'gpsCoordinates': _formData.gpsCoordinates,
-      'landmark':_formData.landmark,
-      'rentalRange': _formData.rentalRange,
+      'underSanctionPlan': _formData.moreDetails?.underSanctionPlan == 'Yes' ? true : false,
+      'accToSanctionPlan': _formData.moreDetails?.accToSanctionPlan == 'Yes' ? true : false,
+     // 'typeOfStructure': _formData.moreDetails?.typeOfStructure,
+      'areaOfPlot': _formData.moreDetails?.areaOfPlot,
+      'numberOfFloors': _formData.moreDetails?.numberOfFloors,
+      'floorOfFlat': _formData.moreDetails?.floorOfFlat,
+      'yearOfConstruction': _formData.moreDetails?.yearOfConstruction,
+      'external': _formData.moreDetails?.external,
+      'internal': _formData.moreDetails?.internal,
+      'flooring': _formData.moreDetails?.flooring,
+      'woodWork': _formData.moreDetails?.woodWork,
+      'fittings': _formData.moreDetails?.fittings,
+      'personContacted':_formData.moreDetails?.personContacted,
+      'rentalRange':_formData.moreDetails?.rentalRange,
+      'marketRate':_formData.moreDetails?.marketRate,
+      'rentedArea': _formData.moreDetails?.rentedArea,
+      'commercialArea': _formData.moreDetails?.commercialArea,
+      'overHeadTank': _formData.moreDetails?.overHeadTank,
+      'pump':_formData.moreDetails?.pump,
+      'gpsCoordinates': _formData.moreDetails?.gpsCoordinates,
+      'landmark':_formData.moreDetails?.landmark,
       'appointment_id': widget.appointmentId, //Add appointment id
-      'basementAccomodation': _formData.basementAccomodation,
-      'basementActual': _formData.basementActual,
-      'basementPermissible': _formData.basementPermissible,
-      'mezzAccomodation': _formData.mezzAccomodation,
-      'mezzActual': _formData.mezzActual,
-      'mezzPermissible': _formData.mezzPermissible,
-      'gfAccomodation': _formData.gfAccomodation,
-      'gfActual': _formData.gfActual,
-      'gfPermissible': _formData.gfPermissible,
-      'ffAccomodation': _formData.ffAccomodation,
-      'ffActual': _formData.ffActual,
-      'ffPermissible': _formData.ffPermissible,
-      'sfAccomodation': _formData.sfAccomodation,
-      'sfActual': _formData.sfActual,
-      'sfPermissible': _formData.sfPermissible,
-      'tfAccomodation': _formData.tfAccomodation,
-      'tfActual': _formData.tfActual,
-      'tfPermissible': _formData.tfPermissible,
+      // 'basementAccomodation': _formData.moreDetails?.basementAccomodation,
+      // 'basementActual': _formData.moreDetails?.basementActual,
+      // 'basementPermissible': _formData.moreDetails?.basementPermissible,
+      // 'mezzAccomodation': _formData.moreDetails?.mezzAccomodation,
+      // 'mezzActual': _formData.moreDetails?.mezzActual,
+      // 'mezzPermissible': _formData.moreDetails?.mezzPermissible,
+      // 'gfAccomodation': _formData.moreDetails?.gfAccomodation,
+      // 'gfActual': _formData.moreDetails?.gfActual,
+      // 'gfPermissible': _formData.moreDetails?.gfPermissible,
+      // 'ffAccomodation': _formData.moreDetails?.ffAccomodation,
+      // 'ffActual': _formData.moreDetails?.ffActual,
+      // 'ffPermissible': _formData.moreDetails?.ffPermissible,
+      // 'sfAccomodation': _formData.moreDetails?.sfAccomodation,
+      // 'sfActual': _formData.moreDetails?.sfActual,
+      // 'sfPermissible': _formData.moreDetails?.sfPermissible,
+      // 'tfAccomodation': _formData.moreDetails?.tfAccomodation,
+      // 'tfActual': _formData.tfActual,
+      // 'tfPermissible': _formData.moreDetails?.tfPermissible,
     });
 
     print(body);
@@ -1009,16 +569,15 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         final responseData = jsonDecode(response.body);
 
         JsonEncoder encoder = const JsonEncoder.withIndent('  '); //
-        Get.to(()=>RoomSelectionPage(appID: widget.appointmentId.toString(),));// Add indent for readability
         String prettyJson = encoder.convert(responseData);
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-                content: Text('Additional details saved successfully!')));
+                content: Text('More details saved successfully!')));
 
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(
-                'Failed to save Additional details data. Error: ${response
+                'Failed to save More details data. Error: ${response
                     .statusCode}')));
       }
     } catch (e) {
@@ -1040,17 +599,17 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     };
     final body = jsonEncode({
       'appointment_id': widget.appointmentId, //Add appointment id
-      'applicableRate': _formData.applicableRate,
-      'twoPropertyDealersName1': _formData.twoPropertyDealersName1,
-      'twoPropertyDealersContact1': _formData.twoPropertyDealersContact1,
-      'twoPropertyDealersName2': _formData.twoPropertyDealersName2,
-      'twoPropertyDealersContact2': _formData.twoPropertyDealersContact2,
-      'setBacksFront': _formData.setBacksFront,
-      'setBacksRear': _formData.setBacksRear,
-      'setBacksSide1': _formData.setBacksSide1,
-      'setBacksSide2': _formData.setBacksSide2,
-      'levelOfDevelopment': _formData.levelOfDevelopment,
-      'housesInVicinity': _formData.housesInVicinity,
+      'applicableRate': _formData.additionalDetails?.applicableRate,
+      'twoPropertyDealersName1': _formData.additionalDetails?.twoPropertyDealersName1,
+      'twoPropertyDealersContact1': _formData.additionalDetails?.twoPropertyDealersContact1,
+      'twoPropertyDealersName2': _formData.additionalDetails?.twoPropertyDealersName2,
+      'twoPropertyDealersContact2': _formData.additionalDetails?.twoPropertyDealersContact2,
+      'setBacksFront': _formData.additionalDetails?.setBacksFront,
+      'setBacksRear': _formData.additionalDetails?.setBacksRear,
+      'setBacksSide1': _formData.additionalDetails?.setBacksSide1,
+      'setBacksSide2': _formData.additionalDetails?.setBacksSide2,
+      'levelOfDevelopment': _formData.additionalDetails?.levelOfDevelopment,
+      'housesInVicinity': _formData.additionalDetails?.housesInVicinity,
     });
 
     print(body);
@@ -1069,6 +628,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
 
         JsonEncoder encoder = const JsonEncoder.withIndent('  ');
         String prettyJson = encoder.convert(responseData);
+        Get.to(()=>RoomSelectionPage(appID: widget.appointmentId.toString(),));// Add indent for readability
 
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -1101,8 +661,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       if (pickedFile != null) {
         setState(() {
           var ownerImageFile = File(pickedFile.path);
-          _formData.ownerImagePath = pickedFile.path;
-          _prefs?.setString(ownerImagePathKey, pickedFile.path);
+          _formData.personalInfo?.imagePath = pickedFile.path;
         });
         widget.onFormDataChange(_formData);
       }
@@ -1228,13 +787,13 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
       ),
       Step(
         title: const Text('More Details'),
-        content: _buildAdditionalDetailsForm(),
+        content: _buildMoreDetailsForm(),
         isActive: _currentStepIndex == 3,
         state: _currentStepIndex >= 3 ? StepState.complete : StepState.indexed,
       ),
       Step(
         title: const Text('Additional Details'),
-        content: _buildMoreDetailsForm(),
+        content: _buildAdditionalDetailsForm(),
         isActive: _currentStepIndex == 4,
         state: _currentStepIndex >= 4 ? StepState.complete : StepState.indexed,
       ),
@@ -1261,15 +820,13 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               ),
               validator: (value) =>
               value == null || value.isEmpty ? 'Please enter the Owner name' : null,
-              onSaved: (value) => _formData.clientName = value,
+              onSaved: (value) => _formData.personalInfo?.clientName = value,
               onChanged: (value) {
-                _formData.clientName = value;
-                _prefs?.setString(clientNameKey, value);
+                _formData.personalInfo?.clientName = value;
                 widget.onFormDataChange(_formData);
               },
             ),
           ),
-
           const SizedBox(height: 16),
           const Text("2. Address"),
           const SizedBox(height: 8),
@@ -1285,10 +842,9 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               ),
               validator: (value) =>
               value == null || value.isEmpty ? 'Please enter the property address' : null,
-              onSaved: (value) => _formData.propertyAddress = value,
+              onSaved: (value) => _formData.personalInfo?.propertyAddress = value,
               onChanged: (value) {
-                _formData.propertyAddress = value;
-                _prefs?.setString(propertyAddressKey, value);
+                _formData.personalInfo?.propertyAddress = value;
                 widget.onFormDataChange(_formData);
               },
             ),
@@ -1311,17 +867,16 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               onTap: () async {
                 DateTime? pickedDate = await showDatePicker(
                   context: context,
-                  initialDate: _formData.inspectionDate ?? DateTime.now(),
+                  initialDate: _formData.personalInfo?.inspectionDate ?? DateTime.now(),
                   firstDate: DateTime(2000),
                   lastDate: DateTime(2100),
                 );
                 if (pickedDate != null) {
                   setState(() {
-                    _formData.inspectionDate = pickedDate;
+                    _formData.personalInfo?.inspectionDate = pickedDate;
                     inspectionDateController.text =
                         DateFormat('dd/MM/yyyy').format(pickedDate);
                   });
-                  _prefs?.setString(inspectionDateKey, pickedDate.toIso8601String());
                   widget.onFormDataChange(_formData);
                 }
               },
@@ -1334,16 +889,13 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             children: [
               Radio<String>(
                 value: 'Yes',
-                groupValue: _formData.hasPhotoWithOwner,
+                groupValue: _formData.personalInfo?.hasPhotoWithOwner.toString()??"",
                 onChanged: (value) {
                   setState(() {
-                    _formData.hasPhotoWithOwner = value;
-                    _formData.OwnerReason = null;
-                    _formData.ownerImagePath = null;
+                    _formData.personalInfo?.hasPhotoWithOwner = 1;
+                    _formData.personalInfo?.imageReason = null;
+                    _formData.personalInfo?.imagePath = null;
                     reasonController.clear();
-                    _prefs?.setString(hasPhotoWithOwnerKey, value!);
-                    _prefs?.remove(photoWithOwnerReasonKey!);
-                    _prefs?.remove(ownerImagePathKey);
                   });
                   widget.onFormDataChange(_formData);
                 },
@@ -1351,11 +903,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               const Text('Yes'),
               Radio<String>(
                 value: 'No',
-                groupValue: _formData.hasPhotoWithOwner,
+                groupValue: _formData.personalInfo?.hasPhotoWithOwner.toString()??"",
                 onChanged: (value) {
                   setState(() {
-                    _formData.hasPhotoWithOwner = value;
-                    _prefs?.setString(hasPhotoWithOwnerKey, value!);
+                    _formData.personalInfo?.hasPhotoWithOwner = 0;
                   });
                   widget.onFormDataChange(_formData);
                 },
@@ -1364,7 +915,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             ],
           ),
 
-          if (_formData.hasPhotoWithOwner == 'No') ...[
+          if (_formData.personalInfo?.hasPhotoWithOwner == 0) ...[
             const SizedBox(height: 8),
             TextField(
               controller: reasonController,
@@ -1374,8 +925,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 border: OutlineInputBorder(),
               ),
               onChanged: (text) {
-                setState(() => _formData.OwnerReason = text);
-                _prefs?.setString(photoWithOwnerReasonKey!, text);
+                setState(() => _formData.personalInfo?.imageReason = text);
                 widget.onFormDataChange(_formData);
               },
               maxLines: null,
@@ -1383,7 +933,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             ),
           ],
 
-          if (_formData.hasPhotoWithOwner == 'Yes') ...[
+          if (_formData.personalInfo?.hasPhotoWithOwner == 1) ...[
             const SizedBox(height: 16),
             const Text(
               "Upload supporting image:",
@@ -1406,14 +956,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               ],
             ),
             const SizedBox(height: 10),
-            if (_formData.ownerImagePath != null) ...[
+            if (_formData.personalInfo?.imagePath != null) ...[
               Text("Selected Image:", style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 8),
               Stack(
                 alignment: Alignment.topRight,
                 children: [
-                  Image.file(
-                    File(_formData.ownerImagePath!),
+                  Image.network(
+                    _formData.personalInfo!.imagePath??"",
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
@@ -1435,21 +985,20 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 isDense: true,
               ),
-              value: _formData.zone,
+              value: _formData.personalInfo?.zone,
               items: const ['Central', 'East', 'West', 'North', 'South', 'Haryana', 'U.P.']
                   .map((value) => DropdownMenuItem(value: value, child: Text(value)))
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
-                    _formData.zone = value;
-                    _prefs?.setString(zoneKey, value);
+                    _formData.personalInfo?.zone = value;
                   });
                   widget.onFormDataChange(_formData);
                 }
               },
               validator: (value) => value == null ? 'Please select a zone' : null,
-              onSaved: (value) => _formData.zone = value,
+              onSaved: (value) => _formData.personalInfo?.zone = value,
             ),
           ),
 
@@ -1465,19 +1014,18 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 isDense: true,
               ),
-              value: _formData.typeOfLocality,
+              value: _formData.personalInfo?.typeOfLocality,
               items: const ['Residential', 'Commercial', 'Industrial', 'Agricultural']
                   .map((value) => DropdownMenuItem(value: value, child: Text(value)))
                   .toList(),
               onChanged: (value) {
                 setState(() {
-                  _formData.typeOfLocality = value;
-                  _prefs?.setString(localityTypeKey, value!);
+                  _formData.personalInfo?.typeOfLocality = value;
                 });
                 widget.onFormDataChange(_formData);
               },
               validator: (value) => value == null ? 'Please select a locality' : null,
-              onSaved: (value) => _formData.typeOfLocality = value,
+              onSaved: (value) => _formData.personalInfo?.typeOfLocality = value,
             ),
           ),
 
@@ -1493,19 +1041,18 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 isDense: true,
               ),
-              value: _formData.typeOfColony,
+              value: _formData.personalInfo?.typeOfColony,
               items: const ['Authorised', 'UnAuthorised']
                   .map((value) => DropdownMenuItem(value: value, child: Text(value)))
                   .toList(),
               onChanged: (value) {
                 setState(() {
-                  _formData.typeOfColony = value;
-                  _prefs?.setString(colonyTypeKey, value!);
+                  _formData.personalInfo?.typeOfColony = value;
                 });
                 widget.onFormDataChange(_formData);
               },
               validator: (value) => value == null ? 'Please select type of Colony' : null,
-              onSaved: (value) => _formData.typeOfColony = value,
+              onSaved: (value) => _formData.personalInfo?.typeOfColony = value,
             ),
           ),
         ],
@@ -1530,7 +1077,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     horizontal: 12, vertical: 8),
                 isDense: true,
               ),
-              value: _formData.typeOfOwnership,
+              value: _formData.propertyInfo?.typeOfOwnership,
               items: const <String>['Freehold', 'Leasehold']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
@@ -1540,15 +1087,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               }).toList(),
               onChanged: (String? newValue) {
                 setState(() {
-                  _formData.typeOfOwnership = newValue;
-                  _prefs?.setString(ownershipTypeKey, newValue!);
+                  _formData.propertyInfo?.typeOfOwnership = newValue;
                 });
                 widget.onFormDataChange(_formData);
               },
               validator: (value) =>
               value == null ? 'Please select type of Ownership' : null,
               onSaved: (String? value) {
-                _formData.typeOfOwnership = value;
+                _formData.propertyInfo?.typeOfOwnership = value;
               },
             ),
           ),
@@ -1564,7 +1110,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     horizontal: 12, vertical: 8),
                 isDense: true,
               ),
-              value: _formData.typeOfProperty,
+              value: _formData.propertyInfo?.typeOfProperty,
               items: const <String>[
                 'Independent Bunglow',
                 'Pent House',
@@ -1580,8 +1126,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               }).toList(),
               onChanged: (String? newValue) {
                 setState(() {
-                  _formData.typeOfProperty = newValue;
-                  _prefs?.setString(propertyTypeKey, newValue!);
+                  _formData.propertyInfo?.typeOfProperty = newValue;
                   _updateVisibleFloors(newValue);
                 });
                 widget.onFormDataChange(_formData);
@@ -1589,7 +1134,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               validator: (value) =>
               value == null ? 'Please select type of Property' : null,
               onSaved: (String? value) {
-                _formData.typeOfProperty = value;
+                _formData.propertyInfo?.typeOfProperty = value;
               },
             ),
           ),
@@ -1605,7 +1150,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     horizontal: 12, vertical: 8),
                 isDense: true,
               ),
-              value: _formData.neighborhoodClassification,
+              value: _formData.propertyInfo?.neighborhoodClassification,
               items: const <String>[
                 'Posh',
                 'Good',
@@ -1620,8 +1165,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               }).toList(),
               onChanged: (String? newValue) {
                 setState(() {
-                  _formData.neighborhoodClassification = newValue;
-                  _prefs?.setString(neighborhoodClassKey, newValue!);
+                  _formData.propertyInfo?.neighborhoodClassification = newValue;
                 });
                 widget.onFormDataChange(_formData);
               },
@@ -1630,7 +1174,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   ? 'Please select Neighbourhood Classification'
                   : null,
               onSaved: (String? value) {
-                _formData.neighborhoodClassification = value;
+                _formData.propertyInfo?.neighborhoodClassification = value;
               },
             ),
           ),
@@ -1656,7 +1200,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                value: _formData.occupationStatus,
+                value: _formData.locationInfo?.occupationStatus,
                 items: const <String>[
                   'Self Occupied',
                   'Seller Occupied',
@@ -1670,15 +1214,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _formData.occupationStatus = newValue;
-                    _prefs?.setString(occupationStatusKey, newValue!);
+                    _formData.locationInfo?.occupationStatus = newValue;
                   });
                   widget.onFormDataChange(_formData);
                 },
                 validator: (value) =>
                 value == null ? 'Please select Occupation Status' : null,
                 onSaved: (String? value) {
-                  _formData.occupationStatus = value;
+                  _formData.locationInfo?.occupationStatus = value;
                 },
               ),
             ),
@@ -1699,7 +1242,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                             horizontal: 12, vertical: 8),
                         isDense: true,
                       ),
-                      value: _formData.propertyUsage,
+                      value: _formData.locationInfo?.propertyUsage,
                       items: const <String>[
                         'Residential',
                         'Commercial',
@@ -1713,15 +1256,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       }).toList(),
                       onChanged: (String? newValue) {
                         setState(() {
-                          _formData.propertyUsage = newValue;
-                          _prefs?.setString(propertyUsageKey, newValue!);
+                          _formData.locationInfo?.propertyUsage = newValue;
                         });
                         widget.onFormDataChange(_formData);
                       },
                       validator: (value) =>
                       value == null ? 'Please select Property Usage' : null,
                       onSaved: (String? value) {
-                        _formData.propertyUsage = value;
+                        _formData.locationInfo?.propertyUsage = value;
                       },
                     ),
                   ),
@@ -1740,7 +1282,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                value: _formData.locationOfProperty,
+                value: _formData.locationInfo?.locationOfProperty,
                 items: const <String>[
                   'Corner Plot',
                   'On Main Road',
@@ -1754,15 +1296,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _formData.locationOfProperty = newValue;
-                    _prefs?.setString(propertyLocationKey, newValue!);
+                    _formData.locationInfo?.locationOfProperty = newValue;
                   });
                   widget.onFormDataChange(_formData);
                 },
                 validator: (value) =>
                 value == null ? 'Please select Location Property' : null,
                 onSaved: (String? value) {
-                  _formData.locationOfProperty = value;
+                  _formData.locationInfo?.locationOfProperty = value;
                 },
               ),
             ),
@@ -1772,6 +1313,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: northCoverController,
                 decoration: const InputDecoration(
                   hintText: 'North',
                   border: OutlineInputBorder(),
@@ -1779,7 +1321,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.howItsCoveredNorth,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter North side area covered on';
@@ -1787,11 +1328,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.howItsCoveredNorth = value;
+                  _formData.locationInfo?.howItsCoveredNorth = value;
                 },
                 onChanged: (value) {
-                  _formData.howItsCoveredNorth = value;
-                  _prefs?.setString(coveredNorthKey, value);
+                  _formData.locationInfo?.howItsCoveredNorth = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -1800,6 +1340,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: southCoverController,
                 decoration: const InputDecoration(
                   hintText: 'South',
                   border: OutlineInputBorder(),
@@ -1807,7 +1348,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.howItsCoveredSouth,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter South side area covered on';
@@ -1815,11 +1355,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.howItsCoveredSouth = value;
+                  _formData.locationInfo?.howItsCoveredSouth = value;
                 },
                 onChanged: (value) {
-                  _formData.howItsCoveredSouth = value;
-                  _prefs?.setString(coveredSouthKey, value);
+                  _formData.locationInfo?.howItsCoveredSouth = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -1828,6 +1367,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: eastCoverController,
                 decoration: const InputDecoration(
                   hintText: 'East',
                   border: OutlineInputBorder(),
@@ -1835,7 +1375,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.howItsCoveredEast,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter East side area covered on';
@@ -1843,11 +1382,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.howItsCoveredEast = value;
+                  _formData.locationInfo?.howItsCoveredEast = value;
                 },
                 onChanged: (value) {
-                  _formData.howItsCoveredEast = value;
-                  _prefs?.setString(coveredEastKey, value);
+                  _formData.locationInfo?.howItsCoveredEast = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -1856,6 +1394,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: westCoverController,
                 decoration: const InputDecoration(
                   hintText: 'West',
                   border: OutlineInputBorder(),
@@ -1863,7 +1402,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.howItsCoveredWest,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter West side area covered on';
@@ -1871,11 +1409,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.howItsCoveredWest = value;
+                  _formData.locationInfo?.howItsCoveredWest = value;
                 },
                 onChanged: (value) {
-                  _formData.howItsCoveredWest = value;
-                  _prefs?.setString(coveredWestKey, value);
+                  _formData.locationInfo?.howItsCoveredWest = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -1884,7 +1421,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         ));
   }
 
-  Widget _buildAdditionalDetailsForm() {
+  Widget _buildMoreDetailsForm() {
     return Form(
         key: _formSteps[3],
         child: Column(
@@ -1898,11 +1435,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   children: [
                     Radio<String>(
                       value: 'Yes',
-                      groupValue: _formData.underSanctionPlan,
+                      groupValue: _formData.moreDetails?.underSanctionPlan==1?"Yes":"No",
                       onChanged: (value) {
                         setState(() {
-                          _formData.underSanctionPlan = value;
-                          _prefs?.setString(sanctionPlanSeenKey, value!);
+                          _formData.moreDetails?.underSanctionPlan = value=="Yes"?1:0;
                         });
                         widget.onFormDataChange(_formData);
                       },
@@ -1910,11 +1446,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     const Text('Yes'),
                     Radio<String>(
                       value: 'No',
-                      groupValue: _formData.underSanctionPlan,
+                      groupValue: _formData.moreDetails?.underSanctionPlan==1?"Yes":"No",
                       onChanged: (value) {
                         setState(() {
-                          _formData.underSanctionPlan = value;
-                          _prefs?.setString(sanctionPlanSeenKey, value!);
+                          _formData.moreDetails?.underSanctionPlan = value=="Yes"?1:0;
                         });
                         widget.onFormDataChange(_formData);
                       },
@@ -1933,11 +1468,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   children: [
                     Radio<String>(
                       value: 'Yes',
-                      groupValue: _formData.accToSanctionPlan,
+                      groupValue: _formData.moreDetails?.accToSanctionPlan==1?"Yes":"No",
                       onChanged: (value) {
                         setState(() {
-                          _formData.accToSanctionPlan = value;
-                          _prefs?.setString(accToSanctionPlanKey, value!);
+                          _formData.moreDetails?.accToSanctionPlan = value=="Yes"?1:0;
                         });
                         widget.onFormDataChange(_formData);
                       },
@@ -1945,11 +1479,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                     const Text('Yes'),
                     Radio<String>(
                       value: 'No',
-                      groupValue: _formData.accToSanctionPlan,
+                      groupValue: _formData.moreDetails?.accToSanctionPlan==1?"Yes":"No",
                       onChanged: (value) {
                         setState(() {
-                          _formData.accToSanctionPlan = value;
-                          _prefs?.setString(accToSanctionPlanKey, value!);
+                          _formData.moreDetails?.accToSanctionPlan = value=="Yes"?1:0;
                         });
                         widget.onFormDataChange(_formData);
                       },
@@ -1961,46 +1494,47 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             ),
             const SizedBox(height: 16),
             const Text("17. Type of Structure"),
-            SizedBox(
-              height: 40,
-              child: DropdownButtonFormField<String>(
-                decoration: const InputDecoration(
-                  hintText: 'Select Structure Type',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 8),
-                  isDense: true,
-                ),
-                value: _formData.typeOfStructure,
-                // Corrected here
-                items: const <String>[
-                  'R.C.C.Framed Structure',
-                  'Load bearing Wllas'
-                ]
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _formData.typeOfStructure = newValue; // Corrected here
-                  });
-                  widget.onFormDataChange(_formData);
-                },
-                validator: (value) =>
-                value == null ? 'Please select Structure Type' : null,
-                onSaved: (String? value) {
-                  _formData.typeOfStructure = value; // Corrected here
-                },
-              ),
-            ),
+            // SizedBox(
+            //   height: 40,
+            //   child: DropdownButtonFormField<String>(
+            //     decoration: const InputDecoration(
+            //       hintText: 'Select Structure Type',
+            //       border: OutlineInputBorder(),
+            //       contentPadding: EdgeInsets.symmetric(
+            //           horizontal: 12, vertical: 8),
+            //       isDense: true,
+            //     ),
+            //     value: _formData.moreDetails?.typeOfStructure,
+            //     // Corrected here
+            //     items: const <String>[
+            //       'R.C.C.Framed Structure',
+            //       'Load bearing Wllas'
+            //     ]
+            //         .map<DropdownMenuItem<String>>((String value) {
+            //       return DropdownMenuItem<String>(
+            //         value: value,
+            //         child: Text(value),
+            //       );
+            //     }).toList(),
+            //     onChanged: (String? newValue) {
+            //       setState(() {
+            //         _formData.moreDetails?.typeOfStructure = newValue; // Corrected here
+            //       });
+            //       widget.onFormDataChange(_formData);
+            //     },
+            //     validator: (value) =>
+            //     value == null ? 'Please select Structure Type' : null,
+            //     onSaved: (String? value) {
+            //       _formData.moreDetails?.typeOfStructure = value; // Corrected here
+            //     },
+            //   ),
+            // ),
             const SizedBox(height: 16),
             const Text("18. Area of Plot"),
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: plotAreaController,
                 decoration: const InputDecoration(
                   hintText: 'Enter Plot Area',
                   border: OutlineInputBorder(),
@@ -2008,7 +1542,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.areaOfPlot,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter area of plot';
@@ -2016,16 +1549,12 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.areaOfPlot = value;
+                  _formData.additionalDetails?.areaOfPlot = value;
                 },
-                // inputFormatters: [
-                //   FilteringTextInputFormatter.allow(
-                //       RegExp(r'[0-9.]')),
-                // ],
-                // keyboardType: TextInputType.number,
+
                 onChanged: (value) {
-                  _formData.areaOfPlot = value;
-                  _prefs?.setString(plotAreaKey, value);
+                  _formData.additionalDetails?.areaOfPlot = value;
+
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -2039,6 +1568,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   SizedBox(
                     height: 40,
                     child: TextFormField(
+                      controller: numberOfFloorsController,
                       decoration: const InputDecoration(
                         hintText: 'Enter No. of Floors',
                         border: OutlineInputBorder(),
@@ -2046,7 +1576,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                             horizontal: 12, vertical: 8),
                         isDense: true,
                       ),
-                      initialValue: _formData.numberOfFloors,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter the number of floors';
@@ -2054,15 +1583,15 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                         return null;
                       },
                       onSaved: (value) {
-                        _formData.numberOfFloors = value;
+                        _formData.additionalDetails?.numberOfFloors = value;
+
                       },
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                       ],
                       keyboardType: TextInputType.number,
                       onChanged: (value) {
-                        _formData.numberOfFloors = value;
-                        _prefs?.setString(numFloorsKey, value);
+                        _formData.additionalDetails?.numberOfFloors = value;
                         widget.onFormDataChange(_formData);
                       },
                     ),
@@ -2078,6 +1607,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   SizedBox(
                     height: 40,
                     child: TextFormField(
+                      controller: floorOfFlatController,
                       decoration: InputDecoration(
                         hintText: _floorHintText,
                         border: const OutlineInputBorder(),
@@ -2085,7 +1615,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                             horizontal: 12, vertical: 8),
                         isDense: true,
                       ),
-                      initialValue: _formData.floorOfFlat,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter the Floor at which flat situated';
@@ -2093,15 +1622,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                         return null;
                       },
                       onSaved: (value) {
-                        _formData.floorOfFlat = value;
+                        _formData.additionalDetails?.floorOfFlat = value;
                       },
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                       ],
                       keyboardType: TextInputType.number,
                       onChanged: (value) {
-                        _formData.floorOfFlat = value;
-                        _prefs?.setString(flatFloorKey, value);
+                        _formData.additionalDetails?.floorOfFlat = value;
                         widget.onFormDataChange(_formData);
                       },
                     ),
@@ -2110,13 +1638,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
               ),
             const SizedBox(height: 16),
 
-            if (_showFloorwiseInformationTable)
-              _buildFloorwiseInformationTable(),
+            // if (_showFloorwiseInformationTable)
+            //   _buildFloorwiseInformationTable(),
             const SizedBox(height: 16),
             const Text("22. Year of Construction"),
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: yearOfConstructionController,
                 decoration: const InputDecoration(
                   hintText: 'Enter Construction Year',
                   border: OutlineInputBorder(),
@@ -2124,7 +1653,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.yearOfConstruction,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the year of construction';
@@ -2137,7 +1665,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 ],
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
-                  _formData.yearOfConstruction = value;
+                  _formData.moreDetails?.yearOfConstruction = value;
                 },
               ),
             ),
@@ -2153,7 +1681,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                value: _formData.external,
+                value: _formData.moreDetails?.external,
                 items: const <String>[
                   'Snowcem',
                   'Grit Wash',
@@ -2168,14 +1696,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _formData.external = newValue;
+                    _formData.moreDetails?.external = newValue;
                   });
                   widget.onFormDataChange(_formData);
                 },
                 validator: (value) =>
                 value == null ? 'Please select external' : null,
                 onSaved: (String? value) {
-                  _formData.external = value;
+                  _formData.moreDetails?.external = value;
                 },
               ),
             ),
@@ -2191,7 +1719,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                value: _formData.internal,
+                value: _formData.moreDetails?.internal,
                 items: const <String>['Excellent', 'Good', 'Fair', 'Poor']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
@@ -2201,14 +1729,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _formData.internal = newValue;
+                    _formData.moreDetails?.internal = newValue;
                   });
                   widget.onFormDataChange(_formData);
                 },
                 validator: (value) =>
                 value == null ? 'Please select Internal' : null,
                 onSaved: (String? value) {
-                  _formData.internal = value;
+                  _formData.moreDetails?.internal = value;
                 },
               ),
             ),
@@ -2224,7 +1752,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                value: _formData.flooring,
+                value: _formData.moreDetails?.flooring,
                 items: const <String>[
                   'Kota',
                   'Granite',
@@ -2241,14 +1769,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _formData.flooring = newValue;
+                    _formData.moreDetails?.flooring = newValue;
                   });
                   widget.onFormDataChange(_formData);
                 },
                 validator: (value) =>
                 value == null ? 'Please select Flooring' : null,
                 onSaved: (String? value) {
-                  _formData.flooring = value;
+                  _formData.moreDetails?.flooring = value;
                 },
               ),
             ),
@@ -2264,7 +1792,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                value: _formData.woodWork,
+                value: _formData.moreDetails?.woodWork,
                 items: const <String>[
                   'Panellied',
                   'Glazed',
@@ -2281,14 +1809,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _formData.woodWork = newValue;
+                    _formData.moreDetails?.woodWork = newValue;
                   });
                   widget.onFormDataChange(_formData);
                 },
                 validator: (value) =>
                 value == null ? 'Please select Wood Work' : null,
                 onSaved: (String? value) {
-                  _formData.woodWork = value;
+                  _formData.moreDetails?.woodWork = value;
                 },
               ),
             ),
@@ -2304,7 +1832,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                value: _formData.fittings,
+                value: _formData.moreDetails?.fittings,
                 items: const <String>['ISI', 'Ordinary', 'Superior']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
@@ -2314,14 +1842,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _formData.fittings = newValue;
+                    _formData.moreDetails?.fittings = newValue;
                   });
                   widget.onFormDataChange(_formData);
                 },
                 validator: (value) =>
                 value == null ? 'Please select Fittings' : null,
                 onSaved: (String? value) {
-                  _formData.fittings = value;
+                  _formData.moreDetails?.fittings = value;
                 },
               ),
             ),
@@ -2330,6 +1858,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: personContacted,
                 decoration: const InputDecoration(
                   hintText: 'Enter Person Contacted at Site',
                   border: OutlineInputBorder(),
@@ -2337,7 +1866,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.personContacted,
+
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Person Contacted at Site';
@@ -2345,10 +1874,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.personContacted = value;
+                  _formData.moreDetails?.personContacted = value;
                 },
                 onChanged: (value) {
-                  _formData.personContacted = value;
+                  _formData.moreDetails?.personContacted = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -2358,6 +1887,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: rentalRangeController,
                 decoration: const InputDecoration(
                   hintText: 'Enter Rental Range',
                   border: OutlineInputBorder(),
@@ -2365,7 +1895,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.rentalRange,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Rental Range';
@@ -2373,15 +1902,11 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.rentalRange = value;
+                  _formData.moreDetails?.rentalRange = value;
                 },
-                // inputFormatters: [
-                //   FilteringTextInputFormatter.allow(
-                //       RegExp(r'[0-9.]')),
-                // ],
-                // keyboardType: TextInputType.number,
+
                 onChanged: (value) {
-                  _formData.rentalRange = value;
+                  _formData.moreDetails?.rentalRange = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -2391,6 +1916,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: marketRateController,
                 decoration: const InputDecoration(
                   hintText: 'Enter Market Rate',
                   border: OutlineInputBorder(),
@@ -2398,7 +1924,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.marketRate,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Market Rate of land in locality Area';
@@ -2406,10 +1931,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.marketRate = value;
+                  _formData.moreDetails?.marketRate = value;
                 },
                 onChanged: (value) {
-                  _formData.marketRate = value;
+                  _formData.moreDetails?.marketRate = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -2419,6 +1944,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: rentedAreaController,
                 decoration: const InputDecoration(
                   hintText: 'Enter Rented Area',
                   border: OutlineInputBorder(),
@@ -2426,7 +1952,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.rentedArea,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Rented Area of the Property';
@@ -2434,10 +1959,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.rentedArea = value;
+                  _formData.moreDetails?.rentedArea = value;
                 },
                 onChanged: (value) {
-                  _formData.rentedArea = value;
+                  _formData.moreDetails?.rentedArea = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -2447,6 +1972,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: commercialAreaController,
                 decoration: const InputDecoration(
                   hintText: 'Enter Commercial Area',
                   border: OutlineInputBorder(),
@@ -2454,7 +1980,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.commercialArea,
+
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Commercial Area of Property';
@@ -2462,10 +1988,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.commercialArea = value;
+                  _formData.moreDetails?.commercialArea = value;
                 },
                 onChanged: (value) {
-                  _formData.commercialArea = value;
+                  _formData.moreDetails?.commercialArea = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -2475,15 +2001,14 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: overHeadTankController,
                 decoration: const InputDecoration(
                   hintText: 'Enter Over Head Tank Details',
-
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.overHeadTank,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Over Head Tank';
@@ -2491,10 +2016,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.overHeadTank = value;
+                  _formData.moreDetails?.overHeadTank = value;
                 },
                 onChanged: (value) {
-                  _formData.overHeadTank = value;
+                  _formData.moreDetails?.overHeadTank = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -2504,6 +2029,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: pumpController,
                 decoration: const InputDecoration(
                   hintText: 'Enter Pump Details',
                   border: OutlineInputBorder(),
@@ -2511,7 +2037,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.pump,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Pump';
@@ -2519,10 +2044,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.pump = value;
+                  _formData.moreDetails?.pump = value;
                 },
                 onChanged: (value) {
-                  _formData.pump = value;
+                  _formData.moreDetails?.pump = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -2548,7 +2073,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                               String coordinates =
                                   "${position.latitude}, ${position.longitude}";
                               gpsCoordinatesController.text = coordinates;
-                              _formData.gpsCoordinates = coordinates;
+                              _formData.moreDetails?.gpsCoordinates = coordinates;
                             });
                             widget.onFormDataChange(_formData);
                           }
@@ -2564,7 +2089,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.gpsCoordinates = value;
+                  _formData.moreDetails?.gpsCoordinates = value;
                 },
               ),
             ),
@@ -2573,6 +2098,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             SizedBox(
               height: 40,
               child: TextFormField(
+                controller: landmarkController,
                 decoration: const InputDecoration(
                   hintText: 'Enter Landmark',
                   border: OutlineInputBorder(),
@@ -2580,7 +2106,6 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       horizontal: 12, vertical: 8),
                   isDense: true,
                 ),
-                initialValue: _formData.landmark,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Landmark';
@@ -2588,10 +2113,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                   return null;
                 },
                 onSaved: (value) {
-                  _formData.landmark = value;
+                  _formData.moreDetails?.landmark = value;
                 },
                 onChanged: (value) {
-                  _formData.landmark = value;
+                  _formData.moreDetails?.landmark = value;
                   widget.onFormDataChange(_formData);
                 },
               ),
@@ -2601,7 +2126,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
         ));
   }
 
-  Widget _buildMoreDetailsForm() {
+  Widget _buildAdditionalDetailsForm() {
     return Form(
       key: _formSteps[4],
       child: Column(
@@ -2628,11 +2153,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       isDense: true,
                     ),
                     onSaved: (value) {
-                      _formData.applicableRate = value;
+                      _formData.moreDetails?.applicableRate = value;
                     },
                     onChanged: (value) {
-                      _formData.applicableRate = value;
-                      _prefs?.setString(applicableRateKey, value);
+                      _formData.moreDetails?.applicableRate = value;
                       widget.onFormDataChange(_formData);
                     },
                   ),
@@ -2662,11 +2186,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       isDense: true,
                     ),
                     onSaved: (value) {
-                      _formData.twoPropertyDealersName1 = value;
+                      _formData.additionalDetails?.twoPropertyDealersName1 = value;
                     },
                     onChanged: (value) {
-                      _formData.twoPropertyDealersName1 = value;
-                      _prefs?.setString(dealerName1Key, value);
+                      _formData.additionalDetails?.twoPropertyDealersName1 = value;
                       widget.onFormDataChange(_formData);
                     },
                   ),
@@ -2686,11 +2209,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       isDense: true,
                     ),
                     onSaved: (value) {
-                      _formData.twoPropertyDealersContact1 = value;
+                      _formData.additionalDetails?.twoPropertyDealersContact1 = value;
                     },
                     onChanged: (value) {
-                      _formData.twoPropertyDealersContact1 = value;
-                      _prefs?.setString(dealerContact1Key, value);
+                      _formData.additionalDetails?.twoPropertyDealersContact1 = value;
                       widget.onFormDataChange(_formData);
                     },
                   ),
@@ -2715,11 +2237,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       isDense: true,
                     ),
                     onSaved: (value) {
-                      _formData.twoPropertyDealersName2 = value;
+                      _formData.additionalDetails?.twoPropertyDealersName2 = value;
                     },
                     onChanged: (value) {
-                      _formData.twoPropertyDealersName2 = value;
-                      _prefs?.setString(dealerName2Key, value);
+                      _formData.additionalDetails?.twoPropertyDealersName2 = value;
                       widget.onFormDataChange(_formData);
                     },
                   ),
@@ -2739,11 +2260,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       isDense: true,
                     ),
                     onSaved: (value) {
-                      _formData.twoPropertyDealersContact2 = value;
+                      _formData.additionalDetails?.twoPropertyDealersContact2 = value;
                     },
                     onChanged: (value) {
-                      _formData.twoPropertyDealersContact2 = value;
-                      _prefs?.setString(dealerContact2Key, value);
+                      _formData.additionalDetails?.twoPropertyDealersContact2 = value;
                       widget.onFormDataChange(_formData);
                     },
                   ),
@@ -2773,11 +2293,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       isDense: true,
                     ),
                     onSaved: (value) {
-                      _formData.setBacksFront = value;
+                      _formData.additionalDetails?.setBacksFront = value;
                     },
                     onChanged: (value) {
-                      _formData.setBacksFront = value;
-                      _prefs?.setString(setbacksFrontKey, value);
+                      _formData.additionalDetails?.setBacksFront = value;
                       widget.onFormDataChange(_formData);
                     },
                   ),
@@ -2796,11 +2315,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       isDense: true,
                     ),
                     onSaved: (value) {
-                      _formData.setBacksRear = value;
+                      _formData.additionalDetails?.setBacksRear = value;
                     },
                     onChanged: (value) {
-                      _formData.setBacksRear = value;
-                      _prefs?.setString(setbacksRearKey, value);
+                      _formData.additionalDetails?.setBacksRear = value;
                       widget.onFormDataChange(_formData);
                     },
                   ),
@@ -2819,11 +2337,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       isDense: true,
                     ),
                     onSaved: (value) {
-                      _formData.setBacksSide1 = value;
+                      _formData.additionalDetails?.setBacksSide1 = value;
                     },
                     onChanged: (value) {
-                      _formData.setBacksSide1 = value;
-                      _prefs?.setString(setbacksSide1Key, value);
+                      _formData.additionalDetails?.setBacksSide1 = value;
                       widget.onFormDataChange(_formData);
                     },
                   ),
@@ -2842,11 +2359,10 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                       isDense: true,
                     ),
                     onSaved: (value) {
-                      _formData.setBacksSide2 = value;
+                      _formData.additionalDetails?.setBacksSide2 = value;
                     },
                     onChanged: (value) {
-                      _formData.setBacksSide2 = value;
-                      _prefs?.setString(setbacksSide2Key, value);
+                      _formData.additionalDetails?.setBacksSide2 = value;
                       widget.onFormDataChange(_formData);
                     },
                   ),
@@ -2868,8 +2384,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             onChanged: (value) {
               setState(() {
                 _levelOfDevelopment = value;
-                _formData.levelOfDevelopment = value;
-                _prefs?.setString(developmentLevelKey, value!);
+                _formData.additionalDetails?.levelOfDevelopment = value;
               });
               widget.onFormDataChange(_formData);
             },
@@ -2881,8 +2396,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             onChanged: (value) {
               setState(() {
                 _levelOfDevelopment = value;
-                _formData.levelOfDevelopment = value;
-                _prefs?.setString(developmentLevelKey, value!);
+                _formData.additionalDetails?.levelOfDevelopment = value;
               });
               widget.onFormDataChange(_formData);
             },
@@ -2895,8 +2409,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
             onChanged: (value) {
               setState(() {
                 _levelOfDevelopment = value;
-                _formData.levelOfDevelopment = value;
-                _prefs?.setString(developmentLevelKey, value!);
+                _formData.additionalDetails?.levelOfDevelopment = value;
               });
               widget.onFormDataChange(_formData);
             },
@@ -2923,8 +2436,7 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
                 onChanged: (String? newValue) {
                   setState(() {
                     _housesInVicinity = newValue!;
-                    _formData.housesInVicinity = newValue;
-                    _prefs?.setString(housesVicinityKey, newValue);
+                    _formData.additionalDetails?.housesInVicinity = newValue;
                   });
                   widget.onFormDataChange(_formData);
                 },
@@ -2936,202 +2448,202 @@ class _FieldEngineerFormState extends State<FieldEngineerForm> {
     );
   }
 
-  Widget _buildFloorwiseInformationTable() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '21. Floorwise Built up area of Building',
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            border: TableBorder.all(),
-            columnSpacing: 20.0,
-            columns: const [
-              DataColumn(label: Expanded(child: Text('Floor'))),
-              DataColumn(label: Expanded(child: Text('Accommodation'))),
-              DataColumn(label: Expanded(child: Text('Actual'))),
-              DataColumn(label: Expanded(child: Text('Permissible'))),
-            ],
-            rows: [
-              if (_visibleFloors.contains('Basement'))
-                _buildFloorDataRow(
-                  'Basement',
-                  basementAccomodationController,
-                  basementActualController,
-                  basementPermissibleController,
-                ),
-              if (_visibleFloors.contains('Mezzanine'))
-                _buildFloorDataRow(
-                  'Mezzanine',
-                  mezzAccomodationController,
-                  mezzActualController,
-                  mezzPermissibleController,
-                ),
-              if (_visibleFloors.contains('Ground Floor'))
-                _buildFloorDataRow(
-                  'Ground Floor',
-                  gfAccomodationController,
-                  gfActualController,
-                  gfPermissibleController,
-                ),
-              if (_visibleFloors.contains('First Floor'))
-                _buildFloorDataRow(
-                  'First Floor',
-                  ffAccomodationController,
-                  ffActualController,
-                  ffPermissibleController,
-                ),
-              if (_visibleFloors.contains('Second Floor'))
-                _buildFloorDataRow(
-                  'Second Floor',
-                  sfAccomodationController,
-                  sfActualController,
-                  sfPermissibleController,
-                ),
-              if (_visibleFloors.contains('Third Floor'))
-                _buildFloorDataRow(
-                  'Third Floor',
-                  tfAccomodationController,
-                  tfActualController,
-                  tfPermissibleController,
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildFloorwiseInformationTable() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       const Text(
+  //         '21. Floorwise Built up area of Building',
+  //       ),
+  //       SingleChildScrollView(
+  //         scrollDirection: Axis.horizontal,
+  //         child: DataTable(
+  //           border: TableBorder.all(),
+  //           columnSpacing: 20.0,
+  //           columns: const [
+  //             DataColumn(label: Expanded(child: Text('Floor'))),
+  //             DataColumn(label: Expanded(child: Text('Accommodation'))),
+  //             DataColumn(label: Expanded(child: Text('Actual'))),
+  //             DataColumn(label: Expanded(child: Text('Permissible'))),
+  //           ],
+  //           rows: [
+  //             if (_visibleFloors.contains('Basement'))
+  //               _buildFloorDataRow(
+  //                 'Basement',
+  //                 basementAccomodationController,
+  //                 basementActualController,
+  //                 basementPermissibleController,
+  //               ),
+  //             if (_visibleFloors.contains('Mezzanine'))
+  //               _buildFloorDataRow(
+  //                 'Mezzanine',
+  //                 mezzAccomodationController,
+  //                 mezzActualController,
+  //                 mezzPermissibleController,
+  //               ),
+  //             if (_visibleFloors.contains('Ground Floor'))
+  //               _buildFloorDataRow(
+  //                 'Ground Floor',
+  //                 gfAccomodationController,
+  //                 gfActualController,
+  //                 gfPermissibleController,
+  //               ),
+  //             if (_visibleFloors.contains('First Floor'))
+  //               _buildFloorDataRow(
+  //                 'First Floor',
+  //                 ffAccomodationController,
+  //                 ffActualController,
+  //                 ffPermissibleController,
+  //               ),
+  //             if (_visibleFloors.contains('Second Floor'))
+  //               _buildFloorDataRow(
+  //                 'Second Floor',
+  //                 sfAccomodationController,
+  //                 sfActualController,
+  //                 sfPermissibleController,
+  //               ),
+  //             if (_visibleFloors.contains('Third Floor'))
+  //               _buildFloorDataRow(
+  //                 'Third Floor',
+  //                 tfAccomodationController,
+  //                 tfActualController,
+  //                 tfPermissibleController,
+  //               ),
+  //           ],
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
-  DataRow _buildFloorDataRow(String floorName,
-      TextEditingController accomodationController,
-      TextEditingController actualController,
-      TextEditingController permissibleController,) {
-    return DataRow(
-      cells: [
-        DataCell(Text(floorName)),
-        DataCell(
-          SizedBox(
-            width: 100.0,
-            height: 35,
-            child: TextFormField(
-              decoration: const InputDecoration(
-                hintText: 'Enter Accommodation',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 5),
-                isDense: true,
-              ),
-              controller: accomodationController,
-              style: const TextStyle(fontSize: 14),
-              onChanged: (value) {
-                switch (floorName) {
-                  case 'Basement':
-                    _formData.basementAccomodation = value;
-                    break;
-                  case 'Mezzanine':
-                    _formData.mezzAccomodation = value;
-                    break;
-                  case 'Ground Floor':
-                    _formData.gfAccomodation = value;
-                    break;
-                  case 'First Floor':
-                    _formData.ffAccomodation = value;
-                    break;
-                  case 'Second Floor':
-                    _formData.sfAccomodation = value;
-                    break;
-                  case 'Third Floor':
-                    _formData.tfAccomodation = value;
-                    break;
-                }
-                widget.onFormDataChange(_formData);
-              },
-            ),
-          ),
-        ),
-        DataCell(
-          SizedBox(
-            width: 100.0,
-            height: 35,
-            child: TextFormField(
-              decoration: const InputDecoration(
-                hintText: 'Enter Actual',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 5),
-                isDense: true,
-              ),
-              controller: actualController,
-              style: const TextStyle(fontSize: 14),
-              onChanged: (value) {
-                switch (floorName) {
-                  case 'Basement':
-                    _formData.basementActual = value;
-                    break;
-                  case 'Mezzanine':
-                    _formData.mezzActual = value;
-                    break;
-                  case 'Ground Floor':
-                    _formData.gfActual = value;
-                    break;
-                  case 'First Floor':
-                    _formData.ffActual = value;
-                    break;
-                  case 'Second Floor':
-                    _formData.sfActual = value;
-                    break;
-                  case 'Third Floor':
-                    _formData.tfActual = value;
-                    break;
-                }
-                widget.onFormDataChange(_formData);
-              },
-            ),
-          ),
-        ),
-        DataCell(
-          SizedBox(
-            width: 100.0,
-            height: 35,
-            child: TextFormField(
-              decoration: const InputDecoration(
-                hintText: 'Enter Permissible',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 5),
-                isDense: true,
-              ),
-              controller: permissibleController,
-              style: const TextStyle(fontSize: 14),
-              onChanged: (value) {
-                switch (floorName) {
-                  case 'Basement':
-                    _formData.basementPermissible = value;
-                    break;
-                  case 'Mezzanine':
-                    _formData.mezzPermissible = value;
-                    break;
-                  case 'Ground Floor':
-                    _formData.gfPermissible = value;
-                    break;
-                  case 'First Floor':
-                    _formData.ffPermissible = value;
-                    break;
-                  case 'Second Floor':
-                    _formData.sfPermissible = value;
-                    break;
-                  case 'Third Floor':
-                    _formData.tfPermissible = value;
-                    break;
-                }
-                widget.onFormDataChange(_formData);
-              },
-            ),
-          ),),
-      ],
-    );
-  }
+  // DataRow _buildFloorDataRow(String floorName,
+  //     TextEditingController accomodationController,
+  //     TextEditingController actualController,
+  //     TextEditingController permissibleController,) {
+  //   return DataRow(
+  //     cells: [
+  //       DataCell(Text(floorName)),
+  //       DataCell(
+  //         SizedBox(
+  //           width: 100.0,
+  //           height: 35,
+  //           child: TextFormField(
+  //             decoration: const InputDecoration(
+  //               hintText: 'Enter Accommodation',
+  //               border: OutlineInputBorder(),
+  //               contentPadding: EdgeInsets.symmetric(
+  //                   horizontal: 8, vertical: 5),
+  //               isDense: true,
+  //             ),
+  //             controller: accomodationController,
+  //             style: const TextStyle(fontSize: 14),
+  //             onChanged: (value) {
+  //               switch (floorName) {
+  //                 case 'Basement':
+  //                   _formData.moreDetails?.basementAccomodation = value;
+  //                   break;
+  //                 case 'Mezzanine':
+  //                   _formData.moreDetails?.mezzAccomodation = value;
+  //                   break;
+  //                 case 'Ground Floor':
+  //                   _formData.moreDetails?.gfAccomodation = value;
+  //                   break;
+  //                 case 'First Floor':
+  //                   _formData.moreDetails?.ffAccomodation = value;
+  //                   break;
+  //                 case 'Second Floor':
+  //                   _formData.moreDetails?.sfAccomodation = value;
+  //                   break;
+  //                 case 'Third Floor':
+  //                   _formData.moreDetails?.tfAccomodation = value;
+  //                   break;
+  //               }
+  //               widget.onFormDataChange(_formData);
+  //             },
+  //           ),
+  //         ),
+  //       ),
+  //       DataCell(
+  //         SizedBox(
+  //           width: 100.0,
+  //           height: 35,
+  //           child: TextFormField(
+  //             decoration: const InputDecoration(
+  //               hintText: 'Enter Actual',
+  //               border: OutlineInputBorder(),
+  //               contentPadding: EdgeInsets.symmetric(
+  //                   horizontal: 8, vertical: 5),
+  //               isDense: true,
+  //             ),
+  //             controller: actualController,
+  //             style: const TextStyle(fontSize: 14),
+  //             onChanged: (value) {
+  //               switch (floorName) {
+  //                 case 'Basement':
+  //                   _formData.moreDetails?.basementActual = value;
+  //                   break;
+  //                 case 'Mezzanine':
+  //                   _formData.moreDetails?.mezzActual = value;
+  //                   break;
+  //                 case 'Ground Floor':
+  //                   _formData.moreDetails?.gfActual = value;
+  //                   break;
+  //                 case 'First Floor':
+  //                   _formData.moreDetails?.ffActual = value;
+  //                   break;
+  //                 case 'Second Floor':
+  //                   _formData.moreDetails?.sfActual = value;
+  //                   break;
+  //                 case 'Third Floor':
+  //                   _formData.moreDetails?.tfActual = value;
+  //                   break;
+  //               }
+  //               widget.onFormDataChange(_formData);
+  //             },
+  //           ),
+  //         ),
+  //       ),
+  //       DataCell(
+  //         SizedBox(
+  //           width: 100.0,
+  //           height: 35,
+  //           child: TextFormField(
+  //             decoration: const InputDecoration(
+  //               hintText: 'Enter Permissible',
+  //               border: OutlineInputBorder(),
+  //               contentPadding: EdgeInsets.symmetric(
+  //                   horizontal: 8, vertical: 5),
+  //               isDense: true,
+  //             ),
+  //             controller: permissibleController,
+  //             style: const TextStyle(fontSize: 14),
+  //             onChanged: (value) {
+  //               switch (floorName) {
+  //                 case 'Basement':
+  //                   _formData.moreDetails?.basementPermissible = value;
+  //                   break;
+  //                 case 'Mezzanine':
+  //                   _formData.moreDetails?.mezzPermissible = value;
+  //                   break;
+  //                 case 'Ground Floor':
+  //                   _formData.moreDetails?.gfPermissible = value;
+  //                   break;
+  //                 case 'First Floor':
+  //                   _formData.moreDetails?.ffPermissible = value;
+  //                   break;
+  //                 case 'Second Floor':
+  //                   _formData.moreDetails?.sfPermissible = value;
+  //                   break;
+  //                 case 'Third Floor':
+  //                   _formData.moreDetails?.tfPermissible = value;
+  //                   break;
+  //               }
+  //               widget.onFormDataChange(_formData);
+  //             },
+  //           ),
+  //         ),),
+  //     ],
+  //   );
+  // }
 }
 
